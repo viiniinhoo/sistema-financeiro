@@ -1,22 +1,28 @@
-import { ArrowRightLeft, LayoutDashboard, Target, Calculator, ListTree, User as UserIcon, BarChart3 } from 'lucide-react'
+import { ArrowRightLeft, LayoutDashboard, Target, Calculator, ListTree, User as UserIcon, BarChart3, Menu, PanelLeftClose } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AddTransaction } from './AddTransaction'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const location = useLocation()
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="flex min-h-screen bg-white dark:bg-slate-950">
       
       {/* Desktop/Tablet Sidebar (Hidden on Mobile) */}
-      <aside className="hidden md:flex flex-col w-64 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 fixed inset-y-0 z-40 p-6">
-         <div className="flex items-center gap-3 mb-10">
-           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-             <span className="font-bold text-lg">$</span>
+      <aside className={`hidden md:flex flex-col w-64 bg-slate-50/50 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-100 dark:border-slate-800 fixed inset-y-0 z-40 p-6 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+         <div className="flex items-center justify-between gap-3 mb-10">
+           <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+               <span className="font-bold text-lg">$</span>
+             </div>
+             <span className="font-bold text-xl text-slate-900 dark:text-white">Dois</span>
            </div>
-           <span className="font-bold text-xl text-slate-900 dark:text-white">Finanças Dois</span>
+           <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <PanelLeftClose size={20} />
+           </button>
          </div>
 
          <div className="flex-1 flex flex-col gap-2">
@@ -35,15 +41,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content Area (Shifts right on Desktop) */}
-      <div className="flex-1 flex flex-col min-w-0 md:pl-64 relative pb-24 md:pb-0">
+      <div className={`flex-1 flex flex-col min-w-0 relative pb-24 md:pb-0 transition-all duration-300 ${isSidebarOpen ? 'md:pl-64' : 'pl-0'}`}>
         
         {/* Mobile Top Bar */}
-        <nav className="sticky top-0 z-30 glass border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center sm:hidden">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
-              <span className="font-bold text-sm">$</span>
+        <nav className={`sticky top-0 z-30 glass border-b border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center ${isSidebarOpen ? 'md:hidden' : 'flex'}`}>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="hidden md:flex p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+               <Menu size={20} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
+                <span className="font-bold text-sm">$</span>
+              </div>
+              <span className="font-bold text-slate-900 dark:text-white">Dois</span>
             </div>
-            <span className="font-bold text-slate-900 dark:text-white">Dois</span>
           </div>
           <UserIcon size={20} className="text-slate-400" />
         </nav>
