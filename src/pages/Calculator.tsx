@@ -1,4 +1,4 @@
-import { Calculator as CalcIcon, TrendingUp, Info } from 'lucide-react'
+import { TrendingUp, Info } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export function Calculator() {

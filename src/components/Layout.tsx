@@ -1,4 +1,4 @@
-import { ArrowRightLeft, LayoutDashboard, Target, TrendingUp, Calculator, ListTree, User as UserIcon, BarChart3 } from 'lucide-react'
+import { ArrowRightLeft, LayoutDashboard, Target, Calculator, ListTree, User as UserIcon, BarChart3 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AddTransaction } from './AddTransaction'
