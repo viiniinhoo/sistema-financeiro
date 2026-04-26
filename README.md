@@ -1,73 +1,34 @@
-# React + TypeScript + Vite
+# 💰 Sistema Financeiro Pessoal (Casal)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Um sistema de gestão financeira premium, mobile-first, projetado para casais organizarem suas finanças de forma simples, elegante e eficiente.
 
-Currently, two official plugins are available:
+## ✨ Principais Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Dashboard Inteligente**: Visão geral instantânea de entradas, saídas e saldo do mês.
+- **Calendário de Contas Fixas**: Controle visual de vencimentos com marcação de status (Pago/Pendente).
+- **Orçamento Segmentado**: Separação clara entre Gastos e Fontes de Receita com limites personalizados.
+- **Extrato Mensal**: Histórico organizado por mês com filtros e busca inteligente.
+- **Metas e Economias**: Gestão de objetivos financeiros com barras de progresso.
+- **Design Premium**: Interface moderna com modo dark/light, glassmorphism e micro-interações.
 
-## React Compiler
+## 🚀 Tecnologias
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React + TypeScript + Vite
+- **Estilização**: Tailwind CSS + Lucide React
+- **Backend/Banco**: Supabase
+- **Datas**: date-fns
+- **Gráficos**: Recharts
 
-## Expanding the ESLint configuration
+## 🛠️ Instalação e Uso
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Clone o repositório.
+2. Instale as dependências: `npm install`
+3. Configure as variáveis do Supabase no `.env`:
+   ```
+   VITE_SUPABASE_URL=seu_url
+   VITE_SUPABASE_ANON_KEY=sua_key
+   ```
+4. Inicie o servidor: `npm run dev`
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+Desenvolvido com ❤️ para organização familiar.
