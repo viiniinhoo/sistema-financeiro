@@ -49,7 +49,7 @@ export function Categories() {
   }
 
   return (
-    <div className="px-6 py-8 pb-32">
+    <div className="px-6 py-8 pb-32 md:pb-12 max-w-5xl mx-auto w-full">
       <header className="mb-8">
         <div className="flex justify-between items-start mb-6">
           <div>
@@ -96,7 +96,7 @@ export function Categories() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categoriesWithSpending.map(cat => (
           <CategoryCard 
             key={cat.id}

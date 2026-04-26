@@ -18,7 +18,7 @@ export function Calculator() {
   if (!result) return null
 
   return (
-    <div className="px-6 py-8">
+    <div className="px-6 py-8 md:pb-12 max-w-5xl mx-auto w-full">
       <header className="mb-8">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">Simulador</h1>
         <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1">Estimativa de Juros Compostos</p>
@@ -47,7 +47,7 @@ export function Calculator() {
       </div>
 
       {/* Controls Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="space-y-4">
            <CalcInput label="Inicial" value={initial} onChange={setInitial} suffix="R$" />
            <CalcInput label="Juros" value={rate} onChange={setRate} suffix="%" />

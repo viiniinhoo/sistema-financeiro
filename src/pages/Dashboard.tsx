@@ -54,7 +54,7 @@ export default function Dashboard() {
   // if (loading) return <div className="p-8 text-center text-slate-400">Carregando painel...</div>
 
   return (
-    <div className="px-6 py-8 pb-32">
+    <div className="px-6 py-8 pb-32 md:pb-12 max-w-5xl mx-auto w-full">
       {/* Header section */}
       <header className="flex justify-between items-center mb-8">
         <div>
@@ -83,7 +83,7 @@ export default function Dashboard() {
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.balance)}
           </h2>
           
-          <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/10 pt-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-400/20 flex items-center justify-center">
                 <ArrowUpRight size={16} className="text-emerald-300" />

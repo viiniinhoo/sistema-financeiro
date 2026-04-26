@@ -18,7 +18,7 @@ export function FixedBills() {
   }, [fixedBills])
 
   return (
-    <div className="px-6 py-8 pb-32">
+    <div className="px-6 py-8 pb-32 md:pb-12 max-w-5xl mx-auto w-full">
       <header className="mb-8">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">Calendário</h1>
         <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1">Nossos Vencimentos Mensais</p>
@@ -158,7 +158,7 @@ function BillModal({ categories, onClose, onSave }: any) {
               <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Aluguel, Luz..." className="w-full p-4 bg-slate-50 rounded-2xl outline-indigo-500 font-bold text-slate-800" />
            </div>
 
-           <div className="grid grid-cols-2 gap-4">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Valor Mensal</label>
                 <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="R$ 0,00" className="w-full p-4 bg-slate-50 rounded-2xl outline-indigo-500 font-bold text-slate-800" />

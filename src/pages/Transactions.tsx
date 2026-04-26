@@ -40,7 +40,7 @@ export function Transactions() {
   const sortedDates = Object.keys(groupedTransactions).sort((a, b) => b.localeCompare(a))
 
   return (
-    <div className="px-6 py-8 pb-32">
+    <div className="px-6 py-8 pb-32 md:pb-12 max-w-4xl mx-auto w-full">
       <header className="mb-8">
         <div className="flex justify-between items-start mb-6">
           <div>

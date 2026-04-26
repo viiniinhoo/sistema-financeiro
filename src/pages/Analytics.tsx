@@ -65,7 +65,7 @@ export default function Analytics() {
   const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#f59e0b']
 
   return (
-    <div className="px-6 py-8 pb-32">
+    <div className="px-6 py-8 pb-32 md:pb-12 max-w-6xl mx-auto w-full">
       <header className="mb-8">
         <div className="flex justify-between items-start mb-6">
           <div>
@@ -117,7 +117,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Category Breakdown */}
         <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">

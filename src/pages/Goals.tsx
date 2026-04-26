@@ -22,7 +22,7 @@ export function Goals() {
   }
 
   return (
-    <div className="px-6 py-8 pb-32">
+    <div className="px-6 py-8 pb-32 md:pb-12 max-w-5xl mx-auto w-full">
       <header className="mb-8">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">Metas</h1>
         <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1">Nossos Sonhos Planejados</p>
@@ -92,7 +92,7 @@ function GoalModal({ onClose, onSave, initialData }: any) {
               <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Viagem de Verão" className="w-full p-4 bg-slate-50 rounded-2xl outline-indigo-500 font-bold text-slate-800" />
            </div>
 
-           <div className="grid grid-cols-2 gap-4">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Valor Alvo</label>
                 <input type="number" value={target} onChange={e => setTarget(e.target.value)} placeholder="R$ 10.000" className="w-full p-4 bg-slate-50 rounded-2xl outline-indigo-500 font-bold text-slate-800" />
