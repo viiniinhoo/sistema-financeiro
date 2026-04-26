@@ -10,12 +10,12 @@ const MOCK_TRANSACTIONS = [
 ]
 
 const MOCK_CATEGORIES = [
-  { id: '1', name: 'Alimentação', icon: '🍎', budget_limit: 1200, type: 'expense' },
-  { id: '2', name: 'Lazer', icon: '🎬', budget_limit: 800, type: 'expense' },
-  { id: '3', name: 'Moradia', icon: '🏠', budget_limit: 3500, type: 'expense' },
-  { id: '4', name: 'Salário', icon: '💰', budget_limit: 0, type: 'income' },
-  { id: '5', name: 'Freelance', icon: '💻', budget_limit: 0, type: 'income' },
-  { id: '6', name: 'Rendimentos', icon: '📈', budget_limit: 0, type: 'income' }
+  { id: '11111111-2222-1111-1111-000000000001', name: 'Alimentação', icon: '🍎', budget_limit: 1200, type: 'expense' },
+  { id: '11111111-2222-1111-1111-000000000002', name: 'Lazer', icon: '🎬', budget_limit: 800, type: 'expense' },
+  { id: '11111111-2222-1111-1111-000000000003', name: 'Moradia', icon: '🏠', budget_limit: 3500, type: 'expense' },
+  { id: '11111111-2222-1111-1111-000000000004', name: 'Salário', icon: '💰', budget_limit: 0, type: 'income' },
+  { id: '11111111-2222-1111-1111-000000000005', name: 'Freelance', icon: '💻', budget_limit: 0, type: 'income' },
+  { id: '11111111-2222-1111-1111-000000000006', name: 'Rendimentos', icon: '📈', budget_limit: 0, type: 'income' }
 ]
 
 const MOCK_FIXED_BILLS = [

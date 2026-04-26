@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
-  const [householdId, setHouseholdId] = useState<string | null>('mock-household-id')
+  const [householdId, setHouseholdId] = useState<string | null>('11111111-1111-1111-1111-111111111111')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {

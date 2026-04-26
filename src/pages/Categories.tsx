@@ -21,7 +21,7 @@ export function Categories() {
     return filtered.map(cat => {
       const spent = transactions
         .filter(t => {
-          const tDate = new Date(t.date)
+          const tDate = new Date(t.date + 'T12:00:00')
           const isInCategory = t.category_id === cat.id || t.category === cat.name
           const isInMonth = isWithinInterval(tDate, { start, end })
           return isInCategory && isInMonth
@@ -108,7 +108,7 @@ export function Categories() {
             color="bg-indigo-600" 
             items={transactions.filter(t => {
                const isInCategory = t.category_id === cat.id || t.category === cat.name
-               const isInMonth = isWithinInterval(new Date(t.date), { 
+               const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { 
                  start: startOfMonth(selectedDate), 
                  end: endOfMonth(selectedDate) 
                })

@@ -20,7 +20,7 @@ export default function Analytics() {
     const end = endOfMonth(selectedDate)
 
     const filteredTransactions = transactions.filter(t => 
-      isWithinInterval(new Date(t.date), { start, end })
+      isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
     )
 
     // 1. Monthly Summary (Last 6 months)
@@ -29,7 +29,7 @@ export default function Analytics() {
       const s = startOfMonth(d)
       const e = endOfMonth(d)
       
-      const monthTrans = transactions.filter(t => isWithinInterval(new Date(t.date), { start: s, end: e }))
+      const monthTrans = transactions.filter(t => isWithinInterval(new Date(t.date + 'T12:00:00'), { start: s, end: e }))
       const income = monthTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + (t.amount || 0), 0)
       const expense = monthTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + (t.amount || 0), 0)
       

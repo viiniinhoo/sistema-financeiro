@@ -30,15 +30,23 @@ export function AddTransaction({ onClose }: { onClose: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async () => {
-    if (!amount || !description || !householdId) return
+    if (!amount || !description) {
+      alert("Por favor, preencha o valor e a descrição!")
+      return
+    }
+    if (!householdId) return
     setIsSubmitting(true)
 
     const selectedCategory = categories.find(c => c.name === categoryName)
     
     try {
-      await createTransactionWithInstallments({
+      if (!import.meta.env.VITE_SUPABASE_URL) {
+         console.warn("Keys not found, connection might fail")
+      }
+
+      const res = await createTransactionWithInstallments({
         householdId: householdId,
-        categoryId: selectedCategory?.id || 'Geral',
+        categoryId: selectedCategory?.id || '11111111-2222-1111-1111-000000000001',
         description,
         amount: parseFloat(amount),
         date,
@@ -47,11 +55,18 @@ export function AddTransaction({ onClose }: { onClose: () => void }) {
         createdBy: user?.user_metadata?.full_name || user?.email || 'Anonymous'
       })
       
+      if (res.error) {
+        console.error('Supabase Rejection:', res.error)
+        alert('Erro do Banco de Dados: ' + res.error.message)
+        setIsSubmitting(false)
+        return
+      }
+
       await refreshData()
       onClose()
-    } catch (error) {
-      console.error('Error creating transaction:', error)
-      alert('Erro ao salvar transação. Verifique sua conexão.')
+    } catch (error: any) {
+      console.error('Network/Internal error:', error)
+      alert('Erro de conexão ou servidor. Ele não reconheceu sua chave Supabase. Você reiniciou o npm run dev?')
     } finally {
       setIsSubmitting(false)
     }

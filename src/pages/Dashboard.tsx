@@ -14,7 +14,7 @@ export default function Dashboard() {
     const end = endOfMonth(now)
 
     const monthlyTransactions = transactions.filter(t => 
-      isWithinInterval(new Date(t.date), { start, end })
+      isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
     )
 
     const incomeTotal = monthlyTransactions
@@ -42,7 +42,7 @@ export default function Dashboard() {
       const spent = transactions
         .filter(t => {
           const isInCategory = t.category_id === cat.id || t.category === cat.name
-          const isInMonth = isWithinInterval(new Date(t.date), { start, end })
+          const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
           return isInCategory && isInMonth
         })
         .reduce((sum, t) => sum + (t.amount || 0), 0)

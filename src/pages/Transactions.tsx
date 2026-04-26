@@ -18,7 +18,7 @@ export function Transactions() {
     return transactions.filter(t => {
       const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesFilter = filterType === 'all' || t.type === filterType
-      const isInMonth = isWithinInterval(new Date(t.date), { start, end })
+      const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
       return matchesSearch && matchesFilter && isInMonth
     })
   }, [transactions, searchTerm, filterType, selectedDate])
@@ -28,8 +28,8 @@ export function Transactions() {
 
   // Group transactions by date
   const groupedTransactions = filteredTransactions.reduce((groups: any, transaction) => {
-    const date = transaction.date || new Date().toISOString()
-    const dateKey = format(new Date(date), 'yyyy-MM-dd')
+    // transaction.date já é YYYY-MM-DD do Supabase
+    const dateKey = transaction.date ? transaction.date.split('T')[0] : new Date().toISOString().split('T')[0]
     if (!groups[dateKey]) {
       groups[dateKey] = []
     }
@@ -90,7 +90,7 @@ export function Transactions() {
            <div key={dateKey}>
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                  <span className="w-1 h-1 rounded-full bg-indigo-600"></span>
-                 {format(new Date(dateKey), "EEEE, d 'de' MMMM", { locale: ptBR })}
+                 {format(new Date(dateKey + 'T12:00:00'), "EEEE, d 'de' MMMM", { locale: ptBR })}
               </h3>
               <div className="space-y-3">
                  {groupedTransactions[dateKey].map((t: any) => (
@@ -147,7 +147,7 @@ function TransactionRow({ transaction, onDelete }: { transaction: any, onDelete:
            <p className={`text-sm font-black ${isIncome ? 'text-emerald-500' : 'text-slate-900'}`}>
               {isIncome ? '+' : '-'} {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
            </p>
-           <p className="text-[9px] font-bold text-slate-300 uppercase">{format(new Date(transaction.date), 'HH:mm')}</p>
+           <p className="text-[9px] font-bold text-slate-300 uppercase">{format(new Date(transaction.date + 'T12:00:00'), 'HH:mm')}</p>
         </div>
         <button 
           onClick={onDelete}
