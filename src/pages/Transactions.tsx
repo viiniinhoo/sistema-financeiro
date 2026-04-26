@@ -1,0 +1,161 @@
+import { Calendar, Search, ArrowUpRight, ArrowDownLeft, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useFinanceData } from '../hooks/useFinanceData'
+import { format, startOfMonth, endOfMonth, isWithinInterval, addMonths, subMonths } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { useState, useMemo } from 'react'
+
+export function Transactions() {
+  const { transactions, deleteTransaction } = useFinanceData()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all')
+
+  const [selectedDate, setSelectedDate] = useState(new Date())
+
+  const filteredTransactions = useMemo(() => {
+    const start = startOfMonth(selectedDate)
+    const end = endOfMonth(selectedDate)
+
+    return transactions.filter(t => {
+      const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesFilter = filterType === 'all' || t.type === filterType
+      const isInMonth = isWithinInterval(new Date(t.date), { start, end })
+      return matchesSearch && matchesFilter && isInMonth
+    })
+  }, [transactions, searchTerm, filterType, selectedDate])
+
+  const handlePrevMonth = () => setSelectedDate(prev => subMonths(prev, 1))
+  const handleNextMonth = () => setSelectedDate(prev => addMonths(prev, 1))
+
+  // Group transactions by date
+  const groupedTransactions = filteredTransactions.reduce((groups: any, transaction) => {
+    const date = transaction.date || new Date().toISOString()
+    const dateKey = format(new Date(date), 'yyyy-MM-dd')
+    if (!groups[dateKey]) {
+      groups[dateKey] = []
+    }
+    groups[dateKey].push(transaction)
+    return groups
+  }, {})
+
+  const sortedDates = Object.keys(groupedTransactions).sort((a, b) => b.localeCompare(a))
+
+  return (
+    <div className="px-6 py-8 pb-32">
+      <header className="mb-8">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">Extrato</h1>
+            <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1">Histórico de Movimentações</p>
+          </div>
+        </div>
+
+        {/* Month Selector */}
+        <div className="flex items-center justify-between bg-white border border-slate-100 p-2 rounded-2xl shadow-sm">
+           <button onClick={handlePrevMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <ChevronLeft size={20} />
+           </button>
+           <div className="text-center">
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Período</p>
+              <p className="text-sm font-black text-slate-800 capitalize">
+                {format(selectedDate, 'MMMM yyyy', { locale: ptBR })}
+              </p>
+           </div>
+           <button onClick={handleNextMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <ChevronRight size={20} />
+           </button>
+        </div>
+      </header>
+
+      {/* Filter Bar */}
+      <div className="flex gap-3 mb-8">
+         <div className="flex-1 bg-white border border-slate-100 rounded-2xl px-4 py-3 flex items-center gap-3 focus-within:border-indigo-300 transition-colors">
+            <Search size={18} className="text-slate-300" />
+            <input 
+              type="text" 
+              placeholder="Buscar lançamento..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="bg-transparent outline-none w-full text-xs font-bold uppercase tracking-tight" 
+            />
+         </div>
+         <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
+            <FilterBtn active={filterType === 'all'} onClick={() => setFilterType('all')} icon={<Calendar size={14} />} />
+            <FilterBtn active={filterType === 'expense'} onClick={() => setFilterType('expense')} icon={<ArrowDownLeft size={14} className="text-rose-500" />} />
+            <FilterBtn active={filterType === 'income'} onClick={() => setFilterType('income')} icon={<ArrowUpRight size={14} className="text-emerald-500" />} />
+         </div>
+      </div>
+
+      <div className="space-y-8">
+        {sortedDates.map(dateKey => (
+           <div key={dateKey}>
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                 <span className="w-1 h-1 rounded-full bg-indigo-600"></span>
+                 {format(new Date(dateKey), "EEEE, d 'de' MMMM", { locale: ptBR })}
+              </h3>
+              <div className="space-y-3">
+                 {groupedTransactions[dateKey].map((t: any) => (
+                    <TransactionRow 
+                      key={t.id} 
+                      transaction={t} 
+                      onDelete={async () => {
+                        if (window.confirm('⚠️ Excluir este lançamento permanentemente?')) {
+                          await deleteTransaction(t.id)
+                        }
+                      }}
+                    />
+                 ))}
+              </div>
+           </div>
+        ))}
+
+        {sortedDates.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-sm text-slate-400">Nenhum lançamento encontrado.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function FilterBtn({ active, icon, onClick }: any) {
+   return (
+      <button 
+        onClick={onClick}
+        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${active ? 'bg-white shadow-sm text-slate-900 border border-slate-100' : 'text-slate-400'}`}
+      >
+         {icon}
+      </button>
+   )
+}
+
+function TransactionRow({ transaction, onDelete }: { transaction: any, onDelete: () => void }) {
+  const isIncome = transaction.type === 'income'
+  return (
+    <div className="bg-white p-4 rounded-3xl border border-slate-100 flex items-center justify-between hover:shadow-premium transition-all group">
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}>
+           {transaction.category === 'Alimentação' ? '🍎' : transaction.category === 'Investimento' ? '📈' : '📁'}
+        </div>
+        <div>
+           <p className="text-sm font-bold text-slate-800">{transaction.description}</p>
+           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{transaction.category}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="text-right">
+           <p className={`text-sm font-black ${isIncome ? 'text-emerald-500' : 'text-slate-900'}`}>
+              {isIncome ? '+' : '-'} {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
+           </p>
+           <p className="text-[9px] font-bold text-slate-300 uppercase">{format(new Date(transaction.date), 'HH:mm')}</p>
+        </div>
+        <button 
+          onClick={onDelete}
+          className="p-2 text-slate-200 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
+  )
+}
