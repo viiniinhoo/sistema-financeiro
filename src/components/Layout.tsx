@@ -10,7 +10,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-slate-950">
+    <div className="flex min-h-[100dvh] bg-white dark:bg-slate-950">
       
       {/* Desktop/Tablet Sidebar (Hidden on Mobile) */}
       <aside className={`hidden md:flex flex-col w-64 bg-slate-50/50 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-100 dark:border-slate-800 fixed inset-y-0 z-40 p-6 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>

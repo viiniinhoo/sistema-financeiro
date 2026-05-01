@@ -148,26 +148,23 @@ function TransactionRow({ transaction, categories, onDelete }: { transaction: an
   const categoryName = category?.name || transaction.category || 'Geral'
 
   return (
-    <div className="bg-white p-4 rounded-3xl border border-slate-100 flex items-center justify-between hover:shadow-premium transition-all group">
-      <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}>
-           {categoryIcon}
-        </div>
+    <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all group">
+      <div className="flex items-center gap-3">
+        <span className="text-lg">{categoryIcon}</span>
         <div>
-           <p className="text-sm font-bold text-slate-800">{transaction.description}</p>
-           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{categoryName}</p>
+           <p className="text-xs font-bold text-slate-700 leading-tight">{transaction.description}</p>
+           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{categoryName}</p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <div className="text-right">
-           <p className={`text-sm font-black ${isIncome ? 'text-emerald-500' : 'text-slate-900'}`}>
-              {isIncome ? '+' : '-'} {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
+           <p className={`text-xs font-black whitespace-nowrap ${isIncome ? 'text-emerald-600' : 'text-slate-900'}`}>
+              {isIncome ? '+' : '-'}{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
            </p>
-           <p className="text-[9px] font-bold text-slate-300 uppercase">{format(new Date(transaction.date + 'T12:00:00'), 'HH:mm')}</p>
         </div>
         <button 
           onClick={onDelete}
-          className="p-2 text-slate-200 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
+          className="text-slate-200 hover:text-rose-500 opacity-0 md:group-hover:opacity-100 transition-all cursor-pointer"
         >
           <Trash2 size={16} />
         </button>

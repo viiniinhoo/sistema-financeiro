@@ -29,7 +29,7 @@ export function Categories() {
         })
         .reduce((sum, t) => sum + (t.amount || 0), 0)
       return { ...cat, spent }
-    })
+    }).sort((a, b) => b.spent - a.spent)
   }, [categories, transactions, selectedDate, categoryType])
 
   const handlePrevMonth = () => setSelectedDate(prev => subMonths(prev, 1))
@@ -287,52 +287,56 @@ function CategoryCard({ icon, title, used, limit, color, items, onEdit, onDelete
   return (
     <div 
       onClick={onClick}
-      className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm hover:shadow-premium transition-all relative group cursor-pointer active:scale-[0.98]"
+      className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all relative group cursor-pointer active:scale-[0.98]"
     >
-      <div className="flex justify-between items-center mb-5">
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 ${isIncome ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+      <div className="flex justify-between items-start mb-4 gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 text-xl">
             {icon}
           </div>
-          <div>
-            <h4 className="font-bold text-slate-800">{title}</h4>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{items} lançamentos este mês</p>
+          <div className="flex flex-col leading-tight min-w-0">
+            <span className="text-[11px] font-black text-slate-800 truncate uppercase tracking-tight">{title}</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+              {items} {items === 1 ? 'item' : 'itens'}
+            </span>
           </div>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button 
-            onClick={(e) => { e.stopPropagation(); onEdit(); }} 
-            className="p-2 text-slate-300 hover:text-indigo-600 transition-colors"
-          >
-            <Edit3 size={16} />
-          </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onDelete(); }} 
-            className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
-          >
-            <Trash2 size={16} />
-          </button>
+        
+        <div className="flex flex-col items-end shrink-0">
+           <span className={`text-xs font-black ${isIncome ? 'text-emerald-500' : 'text-slate-900'}`}>
+             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(used)}
+           </span>
+           {!isIncome && limit > 0 && (
+             <span className="text-[9px] text-slate-300 font-bold uppercase tracking-tighter">
+               Meta: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(limit)}
+             </span>
+           )}
+           <div className="flex gap-2 mt-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="text-slate-300 hover:text-indigo-600 transition-colors p-1">
+                <Edit3 size={13} />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="text-slate-300 hover:text-rose-600 transition-colors p-1">
+                <Trash2 size={13} />
+              </button>
+           </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex justify-between items-end">
-          <span className={`text-[10px] font-black uppercase tracking-widest ${isIncome ? 'text-emerald-500' : isOver ? 'text-rose-500' : 'text-slate-400'}`}>
-            {isIncome ? 'Total Recebido' : isOver ? 'Limite atingido' : 'Disponível'}
-          </span>
-          <p className="text-xs font-bold text-slate-900">
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(used)} 
-            {!isIncome && limit > 0 && (
-              <span className="text-slate-300 font-medium"> / {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(limit)}</span>
-            )}
-          </p>
+      {!isIncome && limit > 0 && (
+        <div className="mt-2 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div className={`${isOver ? 'bg-rose-500' : color} h-full rounded-full transition-all`} style={{ width: `${percentage}%` }}></div>
         </div>
-        {!isIncome && limit > 0 && (
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-            <div className={`${color} h-full rounded-full`} style={{ width: `${percentage}%` }}></div>
-          </div>
-        )}
-      </div>
+      )}
+      {!isIncome && limit === 0 && (
+         <div className="mt-1 flex justify-end">
+             <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">Sem limite</span>
+         </div>
+      )}
+      {isIncome && (
+         <div className="mt-1 flex justify-end">
+             <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Total Recebido</span>
+         </div>
+      )}
     </div>
   )
 }

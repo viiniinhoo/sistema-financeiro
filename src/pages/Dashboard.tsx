@@ -1,12 +1,14 @@
-import { ArrowUpRight, ArrowDownLeft, Wallet, ChevronRight, ChevronLeft, X, Calendar } from 'lucide-react'
+import { ArrowUpRight, ArrowDownLeft, Wallet, ChevronRight, ChevronLeft, X, Calendar, Eye, EyeOff } from 'lucide-react'
 import { useFinanceData } from '../hooks/useFinanceData'
 import { format, startOfMonth, endOfMonth, isWithinInterval, addMonths, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useUI } from '../contexts/UIContext'
 
 export default function Dashboard() {
   const { transactions, categories } = useFinanceData()
+  const { showValues, toggleShowValues } = useUI()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedCategory, setSelectedCategory] = useState<any>(null)
 
@@ -64,6 +66,14 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-2">
+           <button 
+             onClick={toggleShowValues}
+             className="p-2.5 bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 rounded-full shadow-sm transition-all active:scale-90"
+             title={showValues ? "Ocultar valores" : "Mostrar valores"}
+           >
+             {showValues ? <EyeOff size={18} /> : <Eye size={18} />}
+           </button>
+
            <div className="flex items-center bg-white border border-slate-100 p-1 rounded-full shadow-sm">
               <button onClick={handlePrevMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
                 <ChevronLeft size={16} />
@@ -91,7 +101,10 @@ export default function Dashboard() {
           </div>
           <p className="text-indigo-100/80 text-sm font-medium mb-1">Saldo Total</p>
           <h2 className="text-3xl font-bold tracking-tight mb-6">
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.balance)}
+            {showValues 
+              ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.balance)
+              : 'R$ •••••'
+            }
           </h2>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/10 pt-6">
@@ -101,7 +114,12 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-[10px] text-indigo-100/60 font-bold uppercase">Entradas</p>
-                <p className="text-sm font-semibold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.income)}</p>
+                <p className="text-sm font-semibold">
+                  {showValues 
+                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.income)
+                    : 'R$ •••••'
+                  }
+                </p>
               </div>
             </div>
             <div 
@@ -113,7 +131,12 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-[10px] text-indigo-100/60 font-bold uppercase">Saídas</p>
-                <p className="text-sm font-semibold">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.expense)}</p>
+                <p className="text-sm font-semibold">
+                  {showValues 
+                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.expense)
+                    : 'R$ •••••'
+                  }
+                </p>
               </div>
             </div>
           </div>
@@ -158,8 +181,14 @@ export default function Dashboard() {
                       <span className="text-xs font-bold text-slate-700">{cat.name}</span>
                    </div>
                    <span className="text-xs font-black text-slate-900">
-                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cat.spent)}
-                      <span className="text-slate-300 font-medium ml-1"> / {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cat.budget_limit)}</span>
+                      {showValues 
+                        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cat.spent)
+                        : '••••'
+                      }
+                      <span className="text-slate-300 font-medium ml-1"> / {showValues 
+                        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cat.budget_limit)
+                        : '••••'
+                      }</span>
                    </span>
                 </div>
                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -187,6 +216,7 @@ export default function Dashboard() {
 }
 
 function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
+  const { showValues } = useUI()
   const start = startOfMonth(date)
   const end = endOfMonth(date)
 
@@ -234,7 +264,10 @@ function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
               </div>
               <p className={`text-sm font-black ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-900'}`}>
                 {t.type === 'expense' ? '-' : '+'}
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)}
+                {showValues 
+                  ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)
+                  : 'R$ •••••'
+                }
               </p>
             </div>
           ))}
