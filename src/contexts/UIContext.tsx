@@ -6,14 +6,14 @@ type UIContextType = {
 }
 
 const UIContext = createContext<UIContextType>({
-  showValues: true,
+  showValues: false,
   toggleShowValues: () => {},
 })
 
 export const UIProvider = ({ children }: { children: React.ReactNode }) => {
   const [showValues, setShowValues] = useState<boolean>(() => {
     const saved = localStorage.getItem('ui_show_values')
-    return saved !== null ? JSON.parse(saved) : true
+    return saved !== null ? JSON.parse(saved) : false
   })
 
   useEffect(() => {
