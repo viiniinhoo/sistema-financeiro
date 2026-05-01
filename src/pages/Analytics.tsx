@@ -66,31 +66,24 @@ export default function Analytics() {
 
   return (
     <div className="px-6 py-8 pb-32 md:pb-12 max-w-6xl mx-auto w-full">
-      <header className="mb-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">Gráficos</h1>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1">Análise de Desempenho</p>
-          </div>
-          <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
-             <BarChart3 size={20} />
-          </div>
+      <header className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 leading-none">Gráficos</h1>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Análise Mensal</p>
         </div>
-
-        {/* Month Selector */}
-        <div className="flex items-center justify-between bg-white border border-slate-100 p-2 rounded-2xl shadow-sm">
-           <button onClick={handlePrevMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              <ChevronLeft size={20} />
-           </button>
-           <div className="text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Análise de</p>
-              <p className="text-sm font-black text-slate-800 capitalize">
-                {format(selectedDate, 'MMMM yyyy', { locale: ptBR })}
-              </p>
+        
+        <div className="flex items-center gap-2">
+           <div className="flex items-center bg-white border border-slate-100 p-1 rounded-full shadow-sm">
+              <button onClick={handlePrevMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-[10px] font-black text-slate-800 px-2 min-w-[80px] text-center capitalize">
+                {format(selectedDate, 'MMM yyyy', { locale: ptBR })}
+              </span>
+              <button onClick={handleNextMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
+                <ChevronRight size={16} />
+              </button>
            </div>
-           <button onClick={handleNextMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              <ChevronRight size={20} />
-           </button>
         </div>
       </header>
 

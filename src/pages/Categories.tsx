@@ -1,4 +1,4 @@
-import { PieChart, ListTree, X, Edit3, Trash2, ChevronLeft, ChevronRight, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
+import { ListTree, X, Edit3, Trash2, ChevronLeft, ChevronRight, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { useFinanceData } from '../hooks/useFinanceData'
 import { useMemo, useState } from 'react'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns'
@@ -8,6 +8,7 @@ export function Categories() {
   const { categories, transactions, upsertCategory, deleteCategory } = useFinanceData()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCat, setEditingCat] = useState<any>(null)
+  const [selectedCategoryForDetails, setSelectedCategoryForDetails] = useState<any>(null)
 
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [categoryType, setCategoryType] = useState<'income' | 'expense'>('expense')
@@ -50,31 +51,22 @@ export function Categories() {
 
   return (
     <div className="px-6 py-8 pb-32 md:pb-12 max-w-5xl mx-auto w-full">
-      <header className="mb-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">Orçamento</h1>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1">Limites e Categorias</p>
-          </div>
-          <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
-             <PieChart size={20} />
-          </div>
+      <header className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 leading-none">Orçamento</h1>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Limites e Categorias</p>
         </div>
-
-        {/* Month Selector */}
-        <div className="flex items-center justify-between bg-white border border-slate-100 p-2 rounded-2xl shadow-sm">
-           <button onClick={handlePrevMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              <ChevronLeft size={20} />
-           </button>
-           <div className="text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Referência</p>
-              <p className="text-sm font-black text-slate-800 capitalize">
-                {format(selectedDate, 'MMMM yyyy', { locale: ptBR })}
-              </p>
-           </div>
-           <button onClick={handleNextMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              <ChevronRight size={20} />
-           </button>
+        
+        <div className="flex items-center bg-white border border-slate-100 p-1 rounded-full shadow-sm">
+          <button onClick={handlePrevMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-[10px] font-black text-slate-800 px-2 min-w-[80px] text-center capitalize">
+            {format(selectedDate, 'MMM yyyy', { locale: ptBR })}
+          </span>
+          <button onClick={handleNextMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
+            <ChevronRight size={16} />
+          </button>
         </div>
       </header>
 
@@ -116,6 +108,7 @@ export function Categories() {
              }).length}
             onEdit={() => { setEditingCat(cat); setIsModalOpen(true); }}
             onDelete={() => handleDelete(cat.id)}
+            onClick={() => setSelectedCategoryForDetails(cat)}
           />
         ))}
 
@@ -141,6 +134,89 @@ export function Categories() {
           initialData={editingCat} 
         />
       )}
+
+      {selectedCategoryForDetails && (
+        <CategoryDetailsModal 
+          category={selectedCategoryForDetails}
+          transactions={transactions}
+          date={selectedDate}
+          onClose={() => setSelectedCategoryForDetails(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
+  const start = startOfMonth(date)
+  const end = endOfMonth(date)
+
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      const isInCategory = t.category_id === category.id || t.category === category.name
+      const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
+      return isInCategory && isInMonth
+    }).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  }, [transactions, category, start, end])
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" onClick={onClose}>
+      <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute right-8 top-8 text-slate-300 hover:text-slate-600"><X size={20}/></button>
+        
+        <header className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-4xl">{category.icon}</span>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">{category.name}</h2>
+              <div className="flex items-center gap-1.5 text-slate-400">
+                <ChevronLeft size={14} className="opacity-60" />
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {format(date, "MMMM yyyy", { locale: ptBR })}
+                </span>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full w-fit">
+            Total este mês: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(category.spent || 0)}
+          </p>
+        </header>
+
+        <div className="max-h-[50vh] overflow-y-auto pr-2 no-scrollbar space-y-3">
+          {filteredTransactions.map((t: any) => (
+            <div key={t.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+                   {t.type === 'income' ? <ArrowUpRight size={18} className="text-emerald-500" /> : <ArrowDownLeft size={18} className="text-rose-500" />}
+                </div>
+                <div>
+                   <p className="text-sm font-bold text-slate-800">{t.description}</p>
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                     {format(new Date(t.date + 'T12:00:00'), "dd 'de' MMMM", { locale: ptBR })}
+                   </p>
+                </div>
+              </div>
+              <p className={`text-sm font-black ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                {t.type === 'expense' ? '-' : '+'}
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)}
+              </p>
+            </div>
+          ))}
+
+          {filteredTransactions.length === 0 && (
+            <div className="text-center py-12 text-slate-400">
+              <p className="text-sm font-medium italic">Nenhuma transação encontrada neste mês.</p>
+            </div>
+          )}
+        </div>
+
+        <button 
+          onClick={onClose}
+          className="w-full py-5 mt-8 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all text-lg"
+        >
+          Fechar
+        </button>
+      </div>
     </div>
   )
 }
@@ -203,13 +279,16 @@ function CategoryModal({ onClose, onSave, initialData }: any) {
   )
 }
 
-function CategoryCard({ icon, title, used, limit, color, items, onEdit, onDelete, type }: any) {
+function CategoryCard({ icon, title, used, limit, color, items, onEdit, onDelete, onClick, type }: any) {
   const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0
   const isOver = limit > 0 && used >= limit
   const isIncome = type === 'income'
 
   return (
-    <div className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm hover:shadow-premium transition-all relative group">
+    <div 
+      onClick={onClick}
+      className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm hover:shadow-premium transition-all relative group cursor-pointer active:scale-[0.98]"
+    >
       <div className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-4">
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 ${isIncome ? 'bg-emerald-50' : 'bg-slate-50'}`}>
@@ -221,10 +300,16 @@ function CategoryCard({ icon, title, used, limit, color, items, onEdit, onDelete
           </div>
         </div>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={onEdit} className="p-2 text-slate-300 hover:text-indigo-600 transition-colors">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEdit(); }} 
+            className="p-2 text-slate-300 hover:text-indigo-600 transition-colors"
+          >
             <Edit3 size={16} />
           </button>
-          <button onClick={onDelete} className="p-2 text-slate-300 hover:text-rose-600 transition-colors">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(); }} 
+            className="p-2 text-slate-300 hover:text-rose-600 transition-colors"
+          >
             <Trash2 size={16} />
           </button>
         </div>

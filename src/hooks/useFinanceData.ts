@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { startOfMonth, endOfMonth, format } from 'date-fns'
 
 // Dados de exemplo premium para carregamento INSTANTÂNEO
 const MOCK_TRANSACTIONS = [
@@ -61,14 +62,47 @@ export function useFinanceData() {
   }
 
   // Mutations
-  const toggleBillPaid = async (billId: string, isPaid: boolean) => {
+  const toggleBillPaid = async (billId: string, isPaid: boolean, date: Date) => {
     try {
-      const { error } = await supabase.from('fixed_bills').update({ is_paid: isPaid }).eq('id', billId)
-      if (error) {
-         setFixedBills(prev => prev.map(b => b.id === billId ? { ...b, is_paid: isPaid } : b))
+      const bill = fixedBills.find(b => b.id === billId)
+      if (!bill) return
+
+      const description = `PAGAMENTO: ${bill.name}`
+      const start = startOfMonth(date)
+      const end = endOfMonth(date)
+
+      if (isPaid) {
+        // Criar transação de pagamento
+        const catObj = categories.find(c => c.name === bill.category)
+        
+        const newTransaction = {
+          description,
+          amount: bill.amount,
+          category: bill.category,
+          category_id: catObj?.id,
+          date: format(date, 'yyyy-MM-dd'),
+          type: 'expense',
+          household_id: householdId
+        }
+        await supabase.from('transactions').insert([newTransaction])
       } else {
-         await refreshData()
+        // Remover transação de pagamento
+        // Busca a transação exata para este mês
+        const { data: existing } = await supabase
+          .from('transactions')
+          .select('id')
+          .eq('description', description)
+          .eq('household_id', householdId)
+          .gte('date', format(start, 'yyyy-MM-dd'))
+          .lte('date', format(end, 'yyyy-MM-dd'))
+          .limit(1)
+
+        if (existing && existing.length > 0) {
+          await supabase.from('transactions').delete().eq('id', existing[0].id)
+        }
       }
+      
+      await refreshData()
     } catch (e) { console.error(e) }
   }
 
@@ -147,19 +181,16 @@ export function useFinanceData() {
       }
 
       if (res.error) {
-        console.error('Supabase error:', res.error)
-        if (!goal.id || goal.id.length <= 5) {
-          const newGoal = { ...goal, id: 'temp-' + Math.random().toString(36).substr(2, 9) }
-          setGoals(prev => [...prev, newGoal])
-        } else {
-          setGoals(prev => prev.map(g => g.id === goal.id ? goal : g))
-        }
-        return true
+        console.error('Supabase error in upsertGoal:', res.error)
+        return false
       }
       await refreshData()
       return true
-    } catch (e) { return false }
-  }
+    } catch (e) { 
+      console.error('Exception in upsertGoal:', e)
+      return false 
+    }
+}
 
   const deleteGoal = async (id: string) => {
     try {

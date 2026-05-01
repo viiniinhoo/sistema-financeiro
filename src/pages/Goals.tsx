@@ -7,12 +7,20 @@ export function Goals() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingGoal, setEditingGoal] = useState<any>(null)
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
   const handleSave = async (data: any) => {
+    setErrorMsg(null)
+    setIsSubmitting(true)
     const success = await upsertGoal(data)
     if (success) {
       setIsModalOpen(false)
       setEditingGoal(null)
+    } else {
+      setErrorMsg('Não foi possível salvar sua meta. Verifique sua conexão ou se a tabela existe no Supabase.')
     }
+    setIsSubmitting(false)
   }
 
   const handleDelete = async (id: string) => {
@@ -63,13 +71,15 @@ export function Goals() {
           onClose={() => { setIsModalOpen(false); setEditingGoal(null); }} 
           onSave={handleSave} 
           initialData={editingGoal}
+          isSubmitting={isSubmitting}
+          errorMsg={errorMsg}
         />
       )}
     </div>
   )
 }
 
-function GoalModal({ onClose, onSave, initialData }: any) {
+function GoalModal({ onClose, onSave, initialData, isSubmitting, errorMsg }: any) {
   const [name, setName] = useState(initialData?.name || '')
   const [target, setTarget] = useState(initialData?.target_amount || '')
   const [current, setCurrent] = useState(initialData?.current_amount || '0')
@@ -109,11 +119,25 @@ function GoalModal({ onClose, onSave, initialData }: any) {
            </div>
         </div>
 
+        {errorMsg && (
+          <p className="mt-4 text-center text-xs font-bold text-rose-500 bg-rose-50 p-3 rounded-xl border border-rose-100">
+            {errorMsg}
+          </p>
+        )}
+
         <button 
-          onClick={() => onSave({ ...initialData, name, target_amount: parseFloat(target), current_amount: parseFloat(current), icon, deadline })}
-          className="w-full py-5 mt-10 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-600/20 active:scale-95 transition-all text-lg"
+          onClick={() => onSave({ 
+            ...initialData, 
+            name, 
+            target_amount: parseFloat(target as string) || 0, 
+            current_amount: parseFloat(current as string) || 0, 
+            icon, 
+            deadline: deadline || null 
+          })}
+          disabled={isSubmitting || !name}
+          className="w-full py-5 mt-10 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-600/20 active:scale-95 transition-all text-lg disabled:opacity-50 disabled:grayscale"
         >
-          {initialData ? 'Salvar Alterações' : 'Salvar Meta'}
+          {isSubmitting ? 'Salvando...' : initialData ? 'Salvar Alterações' : 'Salvar Meta'}
         </button>
       </div>
     </div>

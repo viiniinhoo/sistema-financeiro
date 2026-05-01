@@ -1,13 +1,15 @@
-import { Calendar, Search, ArrowUpRight, ArrowDownLeft, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, Search, Calendar, Trash2, Plus } from 'lucide-react'
 import { useFinanceData } from '../hooks/useFinanceData'
 import { format, startOfMonth, endOfMonth, isWithinInterval, addMonths, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState, useMemo } from 'react'
+import { AddTransaction } from '../components/AddTransaction'
 
 export function Transactions() {
-  const { transactions, deleteTransaction } = useFinanceData()
+  const { transactions, categories, deleteTransaction } = useFinanceData()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all')
+  const [isAddOpen, setIsAddOpen] = useState(false)
 
   const [selectedDate, setSelectedDate] = useState(new Date())
 
@@ -41,28 +43,24 @@ export function Transactions() {
 
   return (
     <div className="px-6 py-8 pb-32 md:pb-12 max-w-4xl mx-auto w-full">
-      <header className="mb-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">Extrato</h1>
-            <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mt-1">Histórico de Movimentações</p>
-          </div>
+      <header className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 leading-none">Extrato</h1>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Movimentações</p>
         </div>
-
-        {/* Month Selector */}
-        <div className="flex items-center justify-between bg-white border border-slate-100 p-2 rounded-2xl shadow-sm">
-           <button onClick={handlePrevMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              <ChevronLeft size={20} />
-           </button>
-           <div className="text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Período</p>
-              <p className="text-sm font-black text-slate-800 capitalize">
-                {format(selectedDate, 'MMMM yyyy', { locale: ptBR })}
-              </p>
+        
+        <div className="flex items-center gap-2">
+           <div className="flex items-center bg-white border border-slate-100 p-1 rounded-full shadow-sm">
+              <button onClick={handlePrevMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-[10px] font-black text-slate-800 px-2 min-w-[80px] text-center capitalize">
+                {format(selectedDate, 'MMM yyyy', { locale: ptBR })}
+              </span>
+              <button onClick={handleNextMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
+                <ChevronRight size={16} />
+              </button>
            </div>
-           <button onClick={handleNextMonth} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              <ChevronRight size={20} />
-           </button>
         </div>
       </header>
 
@@ -96,7 +94,8 @@ export function Transactions() {
                  {groupedTransactions[dateKey].map((t: any) => (
                     <TransactionRow 
                       key={t.id} 
-                      transaction={t} 
+                      transaction={t}
+                      categories={categories}
                       onDelete={async () => {
                         if (window.confirm('⚠️ Excluir este lançamento permanentemente?')) {
                           await deleteTransaction(t.id)
@@ -114,6 +113,19 @@ export function Transactions() {
           </div>
         )}
       </div>
+
+      {/* Local Add Transaction Button */}
+      <div className="fixed bottom-28 md:bottom-10 right-6 z-40">
+        <button 
+          onClick={() => setIsAddOpen(true)}
+          className="bg-indigo-600 text-white p-4 md:px-6 md:py-4 rounded-2xl md:rounded-full shadow-2xl shadow-indigo-600/40 hover:bg-slate-900 transition-all active:scale-95 flex items-center gap-3 group"
+        >
+          <Plus size={24} />
+          <span className="hidden md:block font-bold">Novo Lançamento</span>
+        </button>
+      </div>
+
+      {isAddOpen && <AddTransaction onClose={() => setIsAddOpen(false)} />}
     </div>
   )
 }
@@ -129,17 +141,21 @@ function FilterBtn({ active, icon, onClick }: any) {
    )
 }
 
-function TransactionRow({ transaction, onDelete }: { transaction: any, onDelete: () => void }) {
+function TransactionRow({ transaction, categories, onDelete }: { transaction: any, categories: any[], onDelete: () => void }) {
   const isIncome = transaction.type === 'income'
+  const category = categories?.find(c => c.id === transaction.category_id || c.name === transaction.category)
+  const categoryIcon = category?.icon || '📁'
+  const categoryName = category?.name || transaction.category || 'Geral'
+
   return (
     <div className="bg-white p-4 rounded-3xl border border-slate-100 flex items-center justify-between hover:shadow-premium transition-all group">
       <div className="flex items-center gap-4">
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}>
-           {transaction.category === 'Alimentação' ? '🍎' : transaction.category === 'Investimento' ? '📈' : '📁'}
+           {categoryIcon}
         </div>
         <div>
            <p className="text-sm font-bold text-slate-800">{transaction.description}</p>
-           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{transaction.category}</p>
+           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{categoryName}</p>
         </div>
       </div>
       <div className="flex items-center gap-4">
