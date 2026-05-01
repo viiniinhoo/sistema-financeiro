@@ -1,4 +1,4 @@
-import { Calendar, ChevronLeft, ChevronRight, Plus, Trash2, X, Pencil, CheckCircle2, Circle, Clock } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Plus, Trash2, X, CheckCircle2, Circle, Clock } from 'lucide-react'
 import { useFinanceData } from '../hooks/useFinanceData'
 import { useState, useMemo } from 'react'
 import { format, startOfMonth, endOfMonth, isWithinInterval, addMonths, subMonths } from 'date-fns'

@@ -12,7 +12,7 @@ export function Categories() {
   const [selectedCategoryForDetails, setSelectedCategoryForDetails] = useState<any>(null)
 
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [categoryType, setCategoryType] = useState<'income' | 'expense'>('expense')
+  const [categoryType, setCategoryType] = useState<'income' | 'expense' | 'investment'>('expense')
 
   const categoriesWithSpending = useMemo(() => {
     const start = startOfMonth(selectedDate)
