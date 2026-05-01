@@ -41,6 +41,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
          </button>
       </aside>
 
+      {/* Mobile Backdrop Blur (Full Screen) */}
+      {isActionMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[100] animate-in fade-in duration-300"
+          onClick={() => setIsActionMenuOpen(false)}
+        />
+      )}
+
       {/* Main Content Area (Shifts right on Desktop) */}
       <div className={`flex-1 flex flex-col min-w-0 relative pb-24 md:pb-0 transition-all duration-300 ${isSidebarOpen ? 'md:pl-64' : 'pl-0'}`}>
         
@@ -65,19 +73,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </main>
         
         {/* Mobile Bottom Navigation (Hidden on Tablet/Desktop) */}
-        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[400px] z-50">
+        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[400px] z-[110]">
           
-          {/* Backdrop Blur when Menu is Open */}
-          {isActionMenuOpen && (
-            <div 
-              className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-[-1] animate-in fade-in duration-500"
-              onClick={() => setIsActionMenuOpen(false)}
-            />
-          )}
-
           {/* Floating Action Menu */}
           {isActionMenuOpen && (
-            <div className="absolute bottom-20 right-6 flex flex-col items-end gap-3 z-50">
+            <div className="absolute bottom-20 right-6 flex flex-col items-end gap-3 z-[120]">
                <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[200ms]">
                  <FloatingActionItem to="/analise" onClick={() => setIsActionMenuOpen(false)} icon={<BarChart3 size={18} />} label="Gráficos" />
                </div>
@@ -91,8 +91,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           )}
 
           <nav className="glass border border-white/20 dark:border-slate-800 rounded-[2.5rem] flex justify-between items-center px-4 py-2 shadow-2xl relative">
-            <NavItem to="/" active={location.pathname === '/'} icon={<LayoutDashboard size={20} />} label="Home" />
-            <NavItem to="/transacoes" active={location.pathname === '/transacoes'} icon={<ArrowRightLeft size={20} />} label="Extrato" />
+            <NavItem to="/" active={location.pathname === '/'} icon={<LayoutDashboard size={20} />} label="Home" onClick={() => setIsActionMenuOpen(false)} />
+            <NavItem to="/transacoes" active={location.pathname === '/transacoes'} icon={<ArrowRightLeft size={20} />} label="Extrato" onClick={() => setIsActionMenuOpen(false)} />
             
             {/* Central FAB */}
             <div className="px-2 flex items-center justify-center">
@@ -104,8 +104,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                </button>
             </div>
 
-            <NavItem to="/categorias" active={location.pathname === '/categorias'} icon={<ListTree size={20} />} label="Budget" />
-            <NavItem to="/metas" active={location.pathname === '/metas'} icon={<Target size={20} />} label="Metas" />
+            <NavItem to="/categorias" active={location.pathname === '/categorias'} icon={<ListTree size={20} />} label="Budget" onClick={() => setIsActionMenuOpen(false)} />
+            <NavItem to="/metas" active={location.pathname === '/metas'} icon={<Target size={20} />} label="Metas" onClick={() => setIsActionMenuOpen(false)} />
           </nav>
         </div>
 
@@ -120,9 +120,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function NavItem({ to, active, icon, label }: { to: string, active: boolean, icon: React.ReactNode, label: string }) {
+function NavItem({ to, active, icon, label, onClick }: { to: string, active: boolean, icon: React.ReactNode, label: string, onClick?: () => void }) {
   return (
-    <Link to={to} className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 rounded-2xl transition-all ${active ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}>
+    <Link 
+      to={to} 
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 rounded-2xl transition-all ${active ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+    >
       {icon}
       <span className="text-[10px] font-bold">{label}</span>
     </Link>
