@@ -152,7 +152,7 @@ function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
   const end = endOfMonth(date)
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter(t => {
+    return transactions.filter((t: any) => {
       const isInCategory = t.category_id === category.id || t.category === category.name
       const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
       return isInCategory && isInMonth
