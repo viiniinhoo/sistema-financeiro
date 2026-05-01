@@ -46,6 +46,14 @@ export default function Analytics() {
     
     const balance = income - expense - investment
     
+    // 0. Historical Calculations (Accumulated Wealth)
+    const histIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + (t.amount || 0), 0)
+    const histExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + (t.amount || 0), 0)
+    const histInvestment = transactions.filter(t => t.type === 'investment').reduce((sum, t) => sum + (t.amount || 0), 0)
+    
+    const accumulatedBalance = histIncome - histExpense - histInvestment
+    const totalWealth = histIncome - histExpense
+
     // Expense Variation (MoM)
     const expenseVariation = prevExpense > 0 ? ((expense - prevExpense) / prevExpense) * 100 : 0
 
@@ -171,9 +179,12 @@ export default function Analytics() {
       last6Months, 
       catDist, 
       last15Days,
-      insight
+      insight,
+      totalWealth,
+      accumulatedBalance,
+      totalInvested: histInvestment
     }
-  }, [transactions, categories, selectedDate])
+  }, [transactions, categories, donutType, selectedDate])
 
   if (loading) return <div className="p-8 text-center text-slate-400">Analisando dados...</div>
 
@@ -200,9 +211,46 @@ export default function Analytics() {
         </div>
       </header>
 
+      {/* Historical Wealth Overview */}
+      <div className="mb-8">
+        <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden border border-slate-800 shadow-2xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Patrimônio Acumulado</span>
+                <div className="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-400 rounded text-[8px] font-black uppercase tracking-tighter">Histórico Real</div>
+              </div>
+              <h2 className="text-3xl font-black tracking-tight">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(analyticsData.totalWealth)}
+              </h2>
+              <p className="text-[10px] text-slate-500 font-medium mt-1 italic">Dica: Somatória de todos os seus meses desde o início.</p>
+            </div>
+
+            <div className="flex gap-4 sm:gap-6 border-t md:border-t-0 md:border-l border-slate-800 pt-6 md:pt-0 md:pl-8">
+              <div>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Saldo Disponível</span>
+                <p className="text-lg font-black text-white leading-none">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(analyticsData.accumulatedBalance)}
+                </p>
+                <span className="text-[8px] text-slate-600 font-bold uppercase mt-1 block">Líquido em conta</span>
+              </div>
+              <div>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Total Investido</span>
+                <p className="text-lg font-black text-indigo-400 leading-none">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(analyticsData.totalInvested)}
+                </p>
+                <span className="text-[8px] text-slate-600 font-bold uppercase mt-1 block">Riqueza em ativos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="bg-white p-4 sm:p-5 rounded-3xl sm:rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+        <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <Target className="text-indigo-600" size={32} />
           </div>
@@ -214,7 +262,7 @@ export default function Analytics() {
           <p className="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-2">O que sobrou dos ganhos</p>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-3xl sm:rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-3 opacity-10">
             <TrendingUp className="text-violet-600" size={32} />
           </div>

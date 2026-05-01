@@ -20,6 +20,7 @@ export default function Dashboard() {
       isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
     )
 
+    // Monthly Calcs
     const incomeTotal = monthlyTransactions
       .filter(t => t.type === 'income')
       .reduce((acc, t) => acc + (t.amount || 0), 0)
@@ -88,6 +89,8 @@ export default function Dashboard() {
         </div>
       </header>
 
+
+
       <div className="relative group mb-8">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
         <div className="relative bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-7 text-white shadow-xl">
@@ -97,48 +100,31 @@ export default function Dashboard() {
              </div>
               <div className="text-right">
                  <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-100/60">{stats.currentMonthLabel}</span>
+                 <h2 className="text-3xl font-black mt-1">
+                   {showValues 
+                     ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.balance) 
+                     : 'R$ ••••••'}
+                 </h2>
               </div>
           </div>
-          <p className="text-indigo-100/80 text-sm font-medium mb-1">Saldo Total</p>
-          <h2 className="text-3xl font-bold tracking-tight mb-6">
-            {showValues 
-              ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.balance)
-              : 'R$ •••••'
-            }
-          </h2>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/10 pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-400/20 flex items-center justify-center">
-                <ArrowUpRight size={16} className="text-emerald-300" />
-              </div>
-              <div>
-                <p className="text-[10px] text-indigo-100/60 font-bold uppercase">Entradas</p>
-                <p className="text-sm font-semibold">
+          <div className="flex justify-between items-center pt-6 border-t border-white/10 mt-6 md:mt-10">
+             <div>
+                <p className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest mb-1">Receitas</p>
+                <p className="text-sm font-black text-white">
                   {showValues 
-                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.income)
-                    : 'R$ •••••'
-                  }
+                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.income) 
+                    : 'R$ •••'}
                 </p>
-              </div>
-            </div>
-            <div 
-              onClick={() => setSelectedCategory({ name: 'Todos os Gastos', icon: '💸', isAll: true })}
-              className="flex items-center gap-3 cursor-pointer hover:bg-white/10 p-2 -m-2 rounded-xl transition-all"
-            >
-              <div className="w-8 h-8 rounded-lg bg-rose-400/20 flex items-center justify-center">
-                <ArrowDownLeft size={16} className="text-rose-300" />
-              </div>
-              <div>
-                <p className="text-[10px] text-indigo-100/60 font-bold uppercase">Saídas</p>
-                <p className="text-sm font-semibold">
+             </div>
+             <div className="text-right">
+                <p className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest mb-1">Despesas</p>
+                <p className="text-sm font-black text-rose-300">
                   {showValues 
-                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.expense)
-                    : 'R$ •••••'
-                  }
+                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.expense) 
+                    : 'R$ •••'}
                 </p>
-              </div>
-            </div>
+             </div>
           </div>
         </div>
       </div>
