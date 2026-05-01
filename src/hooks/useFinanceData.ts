@@ -16,7 +16,8 @@ const MOCK_CATEGORIES = [
   { id: '11111111-2222-1111-1111-000000000003', name: 'Moradia', icon: '🏠', budget_limit: 3500, type: 'expense' },
   { id: '11111111-2222-1111-1111-000000000004', name: 'Salário', icon: '💰', budget_limit: 0, type: 'income' },
   { id: '11111111-2222-1111-1111-000000000005', name: 'Freelance', icon: '💻', budget_limit: 0, type: 'income' },
-  { id: '11111111-2222-1111-1111-000000000006', name: 'Rendimentos', icon: '📈', budget_limit: 0, type: 'income' }
+  { id: '11111111-2222-1111-1111-000000000006', name: 'Rendimentos', icon: '📈', budget_limit: 0, type: 'income' },
+  { id: '11111111-2222-1111-1111-000000000007', name: 'Investimentos', icon: '💎', budget_limit: 500, type: 'expense' }
 ]
 
 const MOCK_FIXED_BILLS = [
@@ -67,7 +68,7 @@ export function useFinanceData() {
       const bill = fixedBills.find(b => b.id === billId)
       if (!bill) return
 
-      const description = `PAGAMENTO: ${bill.name}`
+      const description = bill.name
       const start = startOfMonth(date)
       const end = endOfMonth(date)
 

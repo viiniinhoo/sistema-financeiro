@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, Search, Calendar, Trash2, Plus } from 'lucide-react'
+import { ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, Search, Calendar, Plus } from 'lucide-react'
 import { useFinanceData } from '../hooks/useFinanceData'
 import { format, startOfMonth, endOfMonth, isWithinInterval, addMonths, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -6,10 +6,11 @@ import { useState, useMemo } from 'react'
 import { AddTransaction } from '../components/AddTransaction'
 
 export function Transactions() {
-  const { transactions, categories, deleteTransaction } = useFinanceData()
+  const { transactions, categories } = useFinanceData()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all')
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<any>(null)
 
   const [selectedDate, setSelectedDate] = useState(new Date())
 
@@ -96,10 +97,9 @@ export function Transactions() {
                       key={t.id} 
                       transaction={t}
                       categories={categories}
-                      onDelete={async () => {
-                        if (window.confirm('⚠️ Excluir este lançamento permanentemente?')) {
-                          await deleteTransaction(t.id)
-                        }
+                      onEdit={() => {
+                        setEditingTransaction(t)
+                        setIsAddOpen(true)
                       }}
                     />
                  ))}
@@ -125,7 +125,15 @@ export function Transactions() {
         </button>
       </div>
 
-      {isAddOpen && <AddTransaction onClose={() => setIsAddOpen(false)} />}
+      {isAddOpen && (
+        <AddTransaction 
+          onClose={() => {
+            setIsAddOpen(false)
+            setEditingTransaction(null)
+          }} 
+          editingTransaction={editingTransaction}
+        />
+      )}
     </div>
   )
 }
@@ -141,14 +149,17 @@ function FilterBtn({ active, icon, onClick }: any) {
    )
 }
 
-function TransactionRow({ transaction, categories, onDelete }: { transaction: any, categories: any[], onDelete: () => void }) {
+function TransactionRow({ transaction, categories, onEdit }: { transaction: any, categories: any[], onEdit: () => void }) {
   const isIncome = transaction.type === 'income'
   const category = categories?.find(c => c.id === transaction.category_id || c.name === transaction.category)
   const categoryIcon = category?.icon || '📁'
   const categoryName = category?.name || transaction.category || 'Geral'
 
   return (
-    <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all group">
+    <div 
+      onClick={onEdit}
+      className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+    >
       <div className="flex items-center gap-3">
         <span className="text-lg">{categoryIcon}</span>
         <div>
@@ -162,12 +173,6 @@ function TransactionRow({ transaction, categories, onDelete }: { transaction: an
               {isIncome ? '+' : '-'}{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
            </p>
         </div>
-        <button 
-          onClick={onDelete}
-          className="text-slate-200 hover:text-rose-500 opacity-0 md:group-hover:opacity-100 transition-all cursor-pointer"
-        >
-          <Trash2 size={16} />
-        </button>
       </div>
     </div>
   )

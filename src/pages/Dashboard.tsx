@@ -246,24 +246,32 @@ function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
               </div>
             </div>
           </div>
+          <p className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full w-fit">
+            Total este mês: {showValues 
+              ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(category.spent || 0)
+              : 'R$ •••••'
+            }
+          </p>
         </header>
 
         <div className="max-h-[50vh] overflow-y-auto pr-2 no-scrollbar space-y-3">
           {filteredTransactions.map((t: any) => (
             <div key={t.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
                    {t.type === 'income' ? <ArrowUpRight size={18} className="text-emerald-500" /> : <ArrowDownLeft size={18} className="text-rose-500" />}
                 </div>
-                <div>
-                   <p className="text-sm font-bold text-slate-800">{t.description}</p>
+                <div className="min-w-0 flex-1">
+                   <p className="text-sm font-bold text-slate-800 truncate">
+                     {t.description.replace(/^PAGAMENTO:\s*/, '')}
+                   </p>
                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
                      {format(new Date(t.date + 'T12:00:00'), "dd 'de' MMMM", { locale: ptBR })}
                    </p>
                 </div>
               </div>
-              <p className={`text-sm font-black ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-900'}`}>
-                {t.type === 'expense' ? '-' : '+'}
+              <p className={`text-sm font-black whitespace-nowrap ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                {t.type === 'expense' ? '- ' : '+ '}
                 {showValues 
                   ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)
                   : 'R$ •••••'
@@ -281,7 +289,7 @@ function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
 
         <button 
           onClick={onClose}
-          className="w-full py-5 mt-8 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all text-lg"
+          className="w-full py-4 mt-8 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all text-sm uppercase tracking-wider"
         >
           Fechar
         </button>

@@ -3,6 +3,7 @@ import { useFinanceData } from '../hooks/useFinanceData'
 import { useMemo, useState } from 'react'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { useUI } from '../contexts/UIContext'
 
 export function Categories() {
   const { categories, transactions, upsertCategory, deleteCategory } = useFinanceData()
@@ -74,17 +75,24 @@ export function Categories() {
       <div className="flex p-1.5 bg-slate-100 rounded-2xl mb-8">
         <button 
           onClick={() => setCategoryType('expense')}
-          className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${categoryType === 'expense' ? 'bg-white shadow-sm text-slate-900 border border-slate-100' : 'text-slate-400 opacity-60'}`}
+          className={`flex-1 py-3 rounded-xl text-[10px] sm:text-xs font-black transition-all flex items-center justify-center gap-1 sm:gap-2 ${categoryType === 'expense' ? 'bg-white shadow-sm text-slate-900 border border-slate-100' : 'text-slate-400 opacity-60 hover:opacity-100'}`}
         >
           <ArrowDownLeft size={16} className={categoryType === 'expense' ? 'text-rose-500' : ''} />
-          <span className="uppercase tracking-tighter">Meus Gastos</span>
+          <span className="uppercase tracking-tighter">Gastos</span>
         </button>
         <button 
           onClick={() => setCategoryType('income')}
-          className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${categoryType === 'income' ? 'bg-white shadow-sm text-slate-900 border border-slate-100' : 'text-slate-400 opacity-60'}`}
+          className={`flex-1 py-3 rounded-xl text-[10px] sm:text-xs font-black transition-all flex items-center justify-center gap-1 sm:gap-2 ${categoryType === 'income' ? 'bg-white shadow-sm text-slate-900 border border-slate-100' : 'text-slate-400 opacity-60 hover:opacity-100'}`}
         >
           <ArrowUpRight size={16} className={categoryType === 'income' ? 'text-emerald-500' : ''} />
-          <span className="uppercase tracking-tighter">Minhas Fontes</span>
+          <span className="uppercase tracking-tighter">Fontes</span>
+        </button>
+        <button 
+          onClick={() => setCategoryType('investment')}
+          className={`flex-1 py-3 rounded-xl text-[10px] sm:text-xs font-black transition-all flex items-center justify-center gap-1 sm:gap-2 ${categoryType === 'investment' ? 'bg-white shadow-sm text-slate-900 border border-slate-100' : 'text-slate-400 opacity-60 hover:opacity-100'}`}
+        >
+          <span className="text-[14px]">💎</span>
+          <span className="uppercase tracking-tighter">Investir</span>
         </button>
       </div>
 
@@ -106,8 +114,6 @@ export function Categories() {
                })
                return isInCategory && isInMonth
              }).length}
-            onEdit={() => { setEditingCat(cat); setIsModalOpen(true); }}
-            onDelete={() => handleDelete(cat.id)}
             onClick={() => setSelectedCategoryForDetails(cat)}
           />
         ))}
@@ -115,7 +121,7 @@ export function Categories() {
         {categoriesWithSpending.length === 0 && (
           <div className="text-center py-12 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
              <ListTree size={32} className="text-slate-200 mx-auto mb-3" />
-             <p className="text-xs text-slate-400 font-medium">Nenhuma categoria de {categoryType === 'expense' ? 'gasto' : 'receita'} cadastrada</p>
+             <p className="text-xs text-slate-400 font-medium">Nenhuma categoria de {categoryType === 'expense' ? 'gasto' : categoryType === 'income' ? 'receita' : 'investimento'} cadastrada</p>
           </div>
         )}
         
@@ -123,7 +129,7 @@ export function Categories() {
           onClick={() => { setEditingCat(null); setIsModalOpen(true); }}
           className="flex items-center justify-center gap-2 w-full py-5 bg-slate-50 border border-slate-100 rounded-3xl text-slate-400 font-bold text-sm hover:bg-white hover:border-indigo-200 transition-all"
         >
-           + Adicionar {categoryType === 'expense' ? 'Categoria de Gasto' : 'Fonte de Receita'}
+           + Adicionar {categoryType === 'expense' ? 'Categoria de Gasto' : categoryType === 'income' ? 'Fonte de Receita' : 'Conta de Investimento'}
         </button>
       </div>
 
@@ -141,13 +147,22 @@ export function Categories() {
           transactions={transactions}
           date={selectedDate}
           onClose={() => setSelectedCategoryForDetails(null)}
+          onEdit={() => {
+            setEditingCat(selectedCategoryForDetails);
+            setIsModalOpen(true);
+            setSelectedCategoryForDetails(null);
+          }}
+          onDelete={() => {
+            handleDelete(selectedCategoryForDetails.id);
+            setSelectedCategoryForDetails(null);
+          }}
         />
       )}
     </div>
   )
 }
 
-function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
+function CategoryDetailsModal({ category, transactions, date, onClose, onEdit, onDelete }: any) {
   const start = startOfMonth(date)
   const end = endOfMonth(date)
 
@@ -180,24 +195,41 @@ function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
           <p className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full w-fit">
             Total este mês: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(category.spent || 0)}
           </p>
+
+          <div className="flex gap-2 mt-4">
+             <button 
+               onClick={onEdit}
+               className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all text-xs"
+             >
+               <Edit3 size={14} /> Editar
+             </button>
+             <button 
+               onClick={onDelete}
+               className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-100 text-slate-400 font-bold rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all text-xs"
+             >
+               <Trash2 size={14} /> Excluir
+             </button>
+          </div>
         </header>
 
         <div className="max-h-[50vh] overflow-y-auto pr-2 no-scrollbar space-y-3">
           {filteredTransactions.map((t: any) => (
             <div key={t.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
                    {t.type === 'income' ? <ArrowUpRight size={18} className="text-emerald-500" /> : <ArrowDownLeft size={18} className="text-rose-500" />}
                 </div>
-                <div>
-                   <p className="text-sm font-bold text-slate-800">{t.description}</p>
+                <div className="min-w-0 flex-1">
+                   <p className="text-sm font-bold text-slate-800 truncate">
+                     {t.description.replace(/^PAGAMENTO:\s*/, '')}
+                   </p>
                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
                      {format(new Date(t.date + 'T12:00:00'), "dd 'de' MMMM", { locale: ptBR })}
                    </p>
                 </div>
               </div>
-              <p className={`text-sm font-black ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-900'}`}>
-                {t.type === 'expense' ? '-' : '+'}
+              <p className={`text-sm font-black whitespace-nowrap ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                {t.type === 'expense' ? '- ' : '+ '}
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)}
               </p>
             </div>
@@ -212,7 +244,7 @@ function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
 
         <button 
           onClick={onClose}
-          className="w-full py-5 mt-8 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all text-lg"
+          className="w-full py-4 mt-8 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all text-sm uppercase tracking-wider"
         >
           Fechar
         </button>
@@ -248,6 +280,12 @@ function CategoryModal({ onClose, onSave, initialData }: any) {
             >
               Receita
             </button>
+            <button 
+              onClick={() => setType('investment')}
+              className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all ${type === 'investment' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400'}`}
+            >
+              Investir
+            </button>
           </div>
 
           <div className="flex justify-center mb-2">
@@ -258,7 +296,7 @@ function CategoryModal({ onClose, onSave, initialData }: any) {
           </div>
           <div>
             <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Nome da Categoria</label>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={type === 'expense' ? "Ex: Mercado" : "Ex: Salário Freelance"} className="w-full p-4 bg-slate-50 rounded-2xl outline-indigo-500 font-bold text-slate-800" />
+            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder={type === 'expense' ? "Ex: Mercado" : type === 'income' ? "Ex: Salário" : "Ex: Caixinha Nubank"} className="w-full p-4 bg-slate-50 rounded-2xl outline-indigo-500 font-bold text-slate-800" />
           </div>
           {type === 'expense' && (
             <div>
@@ -279,7 +317,8 @@ function CategoryModal({ onClose, onSave, initialData }: any) {
   )
 }
 
-function CategoryCard({ icon, title, used, limit, color, items, onEdit, onDelete, onClick, type }: any) {
+function CategoryCard({ icon, title, used, limit, items, onClick, type }: any) {
+  const { showValues } = useUI()
   const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0
   const isOver = limit > 0 && used >= limit
   const isIncome = type === 'income'
@@ -289,42 +328,41 @@ function CategoryCard({ icon, title, used, limit, color, items, onEdit, onDelete
       onClick={onClick}
       className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all relative group cursor-pointer active:scale-[0.98]"
     >
-      <div className="flex justify-between items-start mb-4 gap-2">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center gap-2 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 text-xl">
             {icon}
           </div>
           <div className="flex flex-col leading-tight min-w-0">
-            <span className="text-[11px] font-black text-slate-800 truncate uppercase tracking-tight">{title}</span>
+            <span className="text-xs font-bold text-slate-700 truncate">{title}</span>
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
               {items} {items === 1 ? 'item' : 'itens'}
             </span>
           </div>
         </div>
         
-        <div className="flex flex-col items-end shrink-0">
-           <span className={`text-xs font-black ${isIncome ? 'text-emerald-500' : 'text-slate-900'}`}>
-             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(used)}
+        <div className="text-right shrink-0">
+           <span className={`text-xs font-black ${isIncome ? 'text-emerald-600' : 'text-slate-900'}`}>
+              {showValues 
+                ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(used)
+                : '••••'
+              }
+              {!isIncome && limit > 0 && (
+                <span className="text-slate-300 font-medium ml-1"> / {showValues 
+                  ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(limit)
+                  : '••••'
+                }</span>
+              )}
            </span>
-           {!isIncome && limit > 0 && (
-             <span className="text-[9px] text-slate-300 font-bold uppercase tracking-tighter">
-               Meta: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(limit)}
-             </span>
-           )}
-           <div className="flex gap-2 mt-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-              <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="text-slate-300 hover:text-indigo-600 transition-colors p-1">
-                <Edit3 size={13} />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="text-slate-300 hover:text-rose-600 transition-colors p-1">
-                <Trash2 size={13} />
-              </button>
-           </div>
         </div>
       </div>
 
       {!isIncome && limit > 0 && (
-        <div className="mt-2 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-          <div className={`${isOver ? 'bg-rose-500' : color} h-full rounded-full transition-all`} style={{ width: `${percentage}%` }}></div>
+        <div className="h-2 bg-slate-100 rounded-full overflow-hidden mt-2">
+          <div 
+            className={`h-full transition-all duration-1000 ${isOver ? 'bg-rose-500' : 'bg-indigo-600'}`}
+            style={{ width: `${percentage}%` }}
+          />
         </div>
       )}
       {!isIncome && limit === 0 && (
@@ -332,11 +370,7 @@ function CategoryCard({ icon, title, used, limit, color, items, onEdit, onDelete
              <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">Sem limite</span>
          </div>
       )}
-      {isIncome && (
-         <div className="mt-1 flex justify-end">
-             <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Total Recebido</span>
-         </div>
-      )}
+      {/* Total Recebido label removed as per user request */}
     </div>
   )
 }

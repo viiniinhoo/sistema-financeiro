@@ -45,9 +45,6 @@ export function FixedBills() {
                 <ChevronRight size={16} />
               </button>
            </div>
-           <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-              <Calendar size={18} />
-           </div>
         </div>
       </header>
 
@@ -61,14 +58,14 @@ export function FixedBills() {
             <button 
               key={day}
               onClick={() => setSelectedDay(day)}
-              className={`flex-shrink-0 w-14 h-20 rounded-2xl flex flex-col items-center justify-center transition-all ${
+              className={`flex-shrink-0 w-11 h-16 rounded-xl flex flex-col items-center justify-center transition-all ${
                 isSelected 
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' 
                   : 'bg-white border border-slate-100 text-slate-400 hover:border-indigo-200'
               }`}
             >
-              <span className="text-[10px] font-black uppercase mb-1 opacity-60">Dia</span>
-              <span className="text-xl font-bold">{day}</span>
+              <span className="text-[8px] font-black uppercase mb-0.5 opacity-60">Dia</span>
+              <span className="text-lg font-bold">{day}</span>
               {hasBills && (
                 <div className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelected ? 'bg-white' : 'bg-indigo-600 animate-pulse'}`}></div>
               )}
@@ -77,15 +74,15 @@ export function FixedBills() {
         })}
       </div>
 
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-tight">Compromissos para o Dia {selectedDay}</h2>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center px-1">
+            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Compromissos para o Dia {selectedDay}</h2>
             {isSyncing && <Clock size={14} className="text-indigo-400 animate-spin" />}
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-2.5">
           {(billsByDay[selectedDay] || []).map((bill: any) => {
-            const description = `PAGAMENTO: ${bill.name}`
+            const description = bill.name
             const start = startOfMonth(selectedDate)
             const end = endOfMonth(selectedDate)
             
@@ -101,11 +98,6 @@ export function FixedBills() {
                   bill={{ ...bill, is_paid: isPaid }} 
                   onToggle={() => toggleBillPaid(bill.id, !isPaid, selectedDate)} 
                   onEdit={() => setEditingBill(bill)}
-                  onDelete={async () => {
-                     if (window.confirm('⚠️ Deseja excluir este vencimento mensal permanentemente?')) {
-                        await deleteFixedBill(bill.id)
-                     }
-                  }}
               />
             )
           })}
@@ -120,23 +112,28 @@ export function FixedBills() {
 
         {/* Global List View */}
         <div className="mt-12 pt-12 border-t border-slate-100">
-           <div className="flex justify-between items-center mb-6">
-              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-tight">Todas as Contas Fixas</h2>
+           <div className="flex justify-between items-center mb-4 px-1">
+              <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Todas as Contas Fixas</h2>
               <button 
                 onClick={() => setEditingBill({})}
-                className="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-all"
+                className="flex items-center gap-2 text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-all uppercase tracking-tight"
               >
-                <Plus size={14} /> Novo
+                <Plus size={12} /> Novo
               </button>
            </div>
            
-           <div className="space-y-3">
+           <div className="grid grid-cols-1 gap-2">
               {fixedBills.map(bill => (
-                <div key={bill.id} className="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-2xl">
+                <div 
+                  key={bill.id} 
+                  onClick={() => setEditingBill(bill)}
+                  className="flex justify-between items-center p-3 bg-white border border-slate-100 rounded-2xl shadow-sm active:scale-[0.98] cursor-pointer"
+                >
                    <div className="flex items-center gap-3">
                       <button 
-                        onClick={() => {
-                          const description = `PAGAMENTO: ${bill.name}`
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          const description = bill.name
                           const start = startOfMonth(selectedDate)
                           const end = endOfMonth(selectedDate)
                           const isPaid = transactions.some(t => 
@@ -148,7 +145,7 @@ export function FixedBills() {
                         className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors"
                       >
                          {transactions.some(t => 
-                            t.description === `PAGAMENTO: ${bill.name}` && 
+                            t.description === bill.name && 
                             isWithinInterval(new Date(t.date + 'T12:00:00'), { 
                               start: startOfMonth(selectedDate), 
                               end: endOfMonth(selectedDate) 
@@ -164,24 +161,6 @@ export function FixedBills() {
                        <p className="text-sm font-black text-slate-900">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(bill.amount)}
                        </p>
-                       <div className="flex items-center gap-1">
-                          <button 
-                            onClick={() => setEditingBill(bill)}
-                            className="p-2 text-slate-200 hover:text-indigo-600 transition-colors"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button 
-                            onClick={async () => {
-                              if (window.confirm('⚠️ Excluir conta fixa permanentemente?')) {
-                                await deleteFixedBill(bill.id)
-                              }
-                            }}
-                            className="p-2 text-slate-200 hover:text-rose-500 transition-colors"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                       </div>
                     </div>
                  </div>
                ))}
@@ -194,6 +173,7 @@ export function FixedBills() {
           categories={categories}
           initialData={editingBill.id ? editingBill : null}
           onClose={() => setEditingBill(null)}
+          deleteFixedBill={deleteFixedBill}
           onSave={async (data: any) => {
             const success = await upsertFixedBill({ ...data, id: editingBill.id })
             if (success) setEditingBill(null)
@@ -204,7 +184,7 @@ export function FixedBills() {
   )
 }
 
-function BillModal({ categories, onClose, onSave, initialData }: any) {
+function BillModal({ categories, onClose, onSave, initialData, deleteFixedBill }: any) {
   const [name, setName] = useState(initialData?.name || '')
   const [amount, setAmount] = useState(initialData?.amount?.toString() || '')
   const [dueDay, setDueDay] = useState(initialData?.due_day?.toString() || '1')
@@ -248,60 +228,73 @@ function BillModal({ categories, onClose, onSave, initialData }: any) {
            </div>
         </div>
 
-        <button 
-          onClick={() => onSave({ name, amount: parseFloat(amount), due_day: parseInt(dueDay), category })}
-          className="w-full py-5 mt-10 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-600/20 active:scale-95 transition-all text-lg"
-        >
-          {initialData ? 'Salvar Alterações' : 'Salvar Vencimento'}
-        </button>
+        <div className="flex gap-3 mt-8">
+          {initialData?.id && (
+            <button 
+              onClick={async () => {
+                if (window.confirm('⚠️ Excluir conta fixa permanentemente?')) {
+                  await deleteFixedBill(initialData.id)
+                  onClose()
+                }
+              }}
+              className="px-5 py-4 bg-rose-50 text-rose-600 font-black rounded-3xl active:scale-95 transition-all"
+            >
+              <Trash2 size={20} />
+            </button>
+          )}
+          <button 
+            onClick={() => onSave({ name, amount: parseFloat(amount), due_day: parseInt(dueDay), category })}
+            className="flex-1 py-4 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-600/20 active:scale-95 transition-all text-sm uppercase tracking-wider"
+          >
+            {initialData?.id ? 'Salvar Alterações' : 'Salvar Vencimento'}
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
-function BillCard({ bill, onToggle, onEdit, onDelete }: { bill: any, onToggle: () => void, onEdit: () => void, onDelete: () => void }) {
+function BillCard({ bill, onToggle, onEdit }: { bill: any, onToggle: () => void, onEdit: () => void }) {
   return (
-    <div className={`bg-white border-l-4 ${bill.is_paid ? 'border-l-emerald-500' : 'border-l-indigo-600'} border border-slate-100 p-5 rounded-2xl shadow-sm hover:shadow-premium transition-all group`}>
-      <div className="flex justify-between items-start">
-        <div className="flex gap-4">
-          <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-xl">
-             🏦
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-800">{bill.name}</h4>
-            <div className="flex items-center gap-2 mt-1">
-               <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase ${bill.is_paid ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-                  {bill.is_paid ? 'Pago' : 'Pendente'}
-               </span>
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Budget: {bill.category}</span>
-            </div>
-          </div>
+    <div 
+      onClick={onEdit}
+      className={`bg-white border-l-4 ${bill.is_paid ? 'border-l-emerald-500' : 'border-l-indigo-600'} border border-slate-100 p-3.5 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center gap-3 relative`}
+    >
+      {/* Icon & Info */}
+      <div className="w-9 h-9 bg-slate-50 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
+         🏦
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <h4 className="font-bold text-slate-800 text-sm truncate">{bill.name}</h4>
+        <div className="flex items-center gap-2 mt-0.5">
+           <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase ${bill.is_paid ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+              {bill.is_paid ? 'Pago' : 'Pendente'}
+           </span>
+           <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight truncate">
+             {bill.category}
+           </span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-             <p className="text-lg font-black text-slate-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(bill.amount)}</p>
-             <button 
-               onClick={onToggle}
-               className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-2 hover:underline"
-             >
-               {bill.is_paid ? 'Desmarcar' : 'Marcar Pago'}
-             </button>
-          </div>
-          <div className="flex flex-col gap-1">
-            <button 
-              onClick={onEdit}
-              className="p-2 text-slate-200 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-all"
-            >
-              <Pencil size={18} />
-            </button>
-            <button 
-              onClick={onDelete}
-              className="p-2 text-slate-200 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-        </div>
+      </div>
+
+      {/* Amount & Main Action */}
+      <div className="text-right flex flex-col items-end gap-1 shrink-0">
+         <p className="text-sm font-black text-slate-900 leading-tight">
+           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(bill.amount)}
+         </p>
+         <button 
+           onClick={(e) => {
+             e.stopPropagation()
+             onToggle()
+           }}
+           className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg transition-colors ${
+             bill.is_paid 
+               ? 'bg-slate-100 text-slate-500' 
+               : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+           }`}
+         >
+           {bill.is_paid ? 'Desfazer' : 'Pagar'}
+         </button>
       </div>
     </div>
   )
