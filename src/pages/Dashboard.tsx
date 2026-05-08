@@ -8,7 +8,7 @@ import { useUI } from '../contexts/UIContext'
 
 export default function Dashboard() {
   const { transactions, categories } = useFinanceData()
-  const { showValues, toggleShowValues, setAddType, setIsAddOpen } = useUI()
+  const { showValues, toggleShowValues } = useUI()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedCategory, setSelectedCategory] = useState<any>(null)
 
