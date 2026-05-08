@@ -1,4 +1,4 @@
-import { X, Calendar, Wallet, Layers, ArrowUpRight, ArrowDownLeft, Trash2, Target } from 'lucide-react'
+import { X, Calendar, Wallet, Layers, ArrowUpRight, ArrowDownLeft, Trash2, Target, Minus, Plus } from 'lucide-react'
 import { useState, useMemo, useEffect } from 'react'
 import { createTransactionWithInstallments, updateInstallmentGroup } from '../lib/transactionLogic'
 import { useAuth } from '../contexts/AuthContext'
@@ -188,13 +188,32 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
                     <p className="text-[10px] text-indigo-400 font-medium">Dividir em parcelas mensais</p>
                 </div>
               </div>
-              <input 
-                type="number" 
-                placeholder="Qtde" 
-                value={installments}
-                onChange={e => setInstallments(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-16 p-2 bg-white rounded-xl border border-indigo-100 text-center text-sm font-bold shadow-sm outline-none focus:border-indigo-400" 
-              />
+              
+              <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-indigo-100 shadow-sm">
+                <button 
+                  onClick={() => setInstallments(Math.max(1, installments - 1))}
+                  className="w-8 h-8 flex items-center justify-center text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                >
+                  <Minus size={16} strokeWidth={3} />
+                </button>
+                
+                <input 
+                  type="number" 
+                  inputMode="numeric"
+                  placeholder="Qtde" 
+                  value={installments}
+                  onFocus={e => e.target.select()}
+                  onChange={e => setInstallments(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-10 text-center text-sm font-bold text-slate-800 outline-none" 
+                />
+
+                <button 
+                  onClick={() => setInstallments(installments + 1)}
+                  className="w-8 h-8 flex items-center justify-center text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                >
+                  <Plus size={16} strokeWidth={3} />
+                </button>
+              </div>
             </div>
           )}
         </div>
