@@ -11,6 +11,7 @@ export type TransactionInput = {
   recurrenceRule?: string
   installmentTotal?: number
   createdBy: string
+  paymentMethod?: string
 }
 
 export async function createTransactionWithInstallments(input: TransactionInput) {
@@ -46,7 +47,8 @@ export async function createTransactionWithInstallments(input: TransactionInput)
       installment_current: isInstallment ? i : null,
       installment_group_id: groupId,
       paid: false, 
-      created_by: input.createdBy
+      created_by: input.createdBy,
+      payment_method: input.paymentMethod || null
     })
   }
 
