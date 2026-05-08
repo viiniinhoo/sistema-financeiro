@@ -87,13 +87,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Mobile Bottom Navigation (Hidden on Tablet/Desktop) */}
         {isBottomNavVisible && (
           <div 
-            style={{ bottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))' }}
-            className="md:hidden fixed left-1/2 -translate-x-1/2 w-[95%] max-w-[400px] z-[110]"
+            style={{ bottom: 0 }}
+            className="md:hidden fixed left-0 right-0 w-full z-[110]"
           >
             
             {/* Floating Action Menu */}
             {isActionMenuOpen && (
-              <div className="absolute bottom-20 right-6 flex flex-col items-end gap-3 z-[120]">
+              <div className="absolute bottom-24 right-6 flex flex-col items-end gap-3 z-[120]">
                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[200ms]">
                    <FloatingActionItem to="/analise" onClick={() => setIsActionMenuOpen(false)} icon={<BarChart3 size={18} />} label="Gráficos" />
                  </div>
@@ -106,7 +106,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </div>
             )}
 
-            <nav className="glass border border-white/20 dark:border-slate-800 rounded-[2.5rem] flex justify-between items-center px-4 py-2 shadow-2xl relative">
+            <nav 
+              style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
+              className="glass border-t border-slate-100 dark:border-slate-800 flex justify-between items-center px-4 pt-3 shadow-2xl relative"
+            >
               <NavItem to="/" active={location.pathname === '/'} icon={<LayoutDashboard size={20} />} label="Home" onClick={() => setIsActionMenuOpen(false)} />
               <NavItem to="/transacoes" active={location.pathname === '/transacoes'} icon={<ArrowRightLeft size={20} />} label="Extrato" onClick={() => setIsActionMenuOpen(false)} />
               
