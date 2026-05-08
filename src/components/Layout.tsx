@@ -87,7 +87,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Mobile Bottom Navigation (Hidden on Tablet/Desktop) */}
         {isBottomNavVisible && (
           <div 
-            style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+            style={{ bottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))' }}
             className="md:hidden fixed left-1/2 -translate-x-1/2 w-[95%] max-w-[400px] z-[110]"
           >
             
