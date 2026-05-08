@@ -314,6 +314,7 @@ export default function Analytics() {
                   ))}
                 </Pie>
                 <Tooltip 
+                  formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
                   contentStyle={{borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
                 />
               </PieChart>
@@ -392,6 +393,7 @@ export default function Analytics() {
                 <YAxis hide />
                 <Tooltip 
                   cursor={{fill: '#f8fafc'}}
+                  formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
                   contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
                 />
                 <Bar dataKey="income" fill="#10b981" radius={[6, 6, 0, 0]} barSize={10} name="Entradas" />
@@ -418,6 +420,7 @@ export default function Analytics() {
                  </linearGradient>
                </defs>
                <Tooltip 
+                 formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
                  contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
                  labelFormatter={(label) => `Data: ${label}`}
                />
