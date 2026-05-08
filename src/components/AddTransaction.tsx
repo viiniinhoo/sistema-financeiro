@@ -220,21 +220,23 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
           )}
 
           {/* Payment Method Selector */}
-          <div className="space-y-3">
+          {type === 'expense' && (
+            <div className="space-y-3">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-2">Meio de Pagamento</span>
               <div className="flex gap-2 p-1 bg-slate-50 border border-slate-100 rounded-3xl">
-                 {['Pix', 'Débito', 'Crédito'].map((m) => (
-                    <button
-                       key={m}
-                       type="button"
-                       onClick={() => setPaymentMethod(m)}
-                       className={`flex-1 py-3 text-[10px] font-black uppercase tracking-tight rounded-2xl transition-all ${paymentMethod === m ? 'bg-white text-indigo-600 shadow-sm border border-indigo-100' : 'text-slate-400'}`}
-                    >
-                       {m}
-                    </button>
-                 ))}
+                {['Pix', 'Débito', 'Crédito'].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setPaymentMethod(m)}
+                    className={`flex-1 py-3 text-[10px] font-black uppercase tracking-tight rounded-2xl transition-all ${paymentMethod === m ? 'bg-white text-indigo-600 shadow-sm border border-indigo-100' : 'text-slate-400'}`}
+                  >
+                    {m}
+                  </button>
+                ))}
               </div>
-           </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 mt-8">
