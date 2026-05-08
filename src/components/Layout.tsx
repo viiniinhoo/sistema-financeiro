@@ -107,8 +107,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             )}
 
             <nav 
-              style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
-              className="glass border-t border-slate-100 dark:border-slate-800 flex justify-between items-center px-4 pt-3 shadow-2xl relative"
+              style={{ paddingBottom: 'calc(0.2rem + env(safe-area-inset-bottom, 0px))' }}
+              className="glass border-t border-slate-100 dark:border-slate-800 flex justify-between items-center px-4 pt-2 shadow-2xl relative"
             >
               <NavItem to="/" active={location.pathname === '/'} icon={<LayoutDashboard size={20} />} label="Home" onClick={() => setIsActionMenuOpen(false)} />
               <NavItem to="/transacoes" active={location.pathname === '/transacoes'} icon={<ArrowRightLeft size={20} />} label="Extrato" onClick={() => setIsActionMenuOpen(false)} />
@@ -145,7 +145,7 @@ function NavItem({ to, active, icon, label, onClick }: { to: string, active: boo
     <Link 
       to={to} 
       onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 rounded-2xl transition-all ${active ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+      className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 rounded-2xl transition-all ${active ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
     >
       {icon}
       <span className="text-[10px] font-bold">{label}</span>
