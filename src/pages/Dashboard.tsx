@@ -129,34 +129,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Action Shortcuts */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <button
-          onClick={() => {
-            setAddType('expense');
-            setIsAddOpen(true);
-          }}
-          className="flex flex-col items-center gap-2 p-4 bg-white border border-slate-100 rounded-3xl shadow-sm hover:shadow-md transition-all active:scale-95 group"
-        >
-          <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors">
-            <ArrowDownLeft size={20} />
-          </div>
-          <span className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Novo Gasto</span>
-        </button>
 
-        <button
-          onClick={() => {
-            setAddType('income');
-            setIsAddOpen(true);
-          }}
-          className="flex flex-col items-center gap-2 p-4 bg-white border border-slate-100 rounded-3xl shadow-sm hover:shadow-md transition-all active:scale-95 group"
-        >
-          <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-            <ArrowUpRight size={20} />
-          </div>
-          <span className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Nova Receita</span>
-        </button>
-      </div>
 
       <div className="mb-8">
         <div className="flex justify-between items-end mb-4">
