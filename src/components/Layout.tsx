@@ -6,8 +6,7 @@ import { useUI } from '../contexts/UIContext'
 import { supabase } from '../lib/supabase'
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { isBottomNavVisible } = useUI()
-  const [isAddOpen, setIsAddOpen] = useState(false)
+  const { isBottomNavVisible, isAddOpen, setIsAddOpen, setAddType } = useUI()
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false)
   const location = useLocation()
@@ -116,7 +115,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {/* Central FAB */}
               <div className="px-2 flex items-center justify-center">
                  <button 
-                   onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                   onPointerDown={(e) => {
+                     const target = e.currentTarget;
+                     const timer = setTimeout(() => {
+                       target.dataset.longpress = 'true';
+                       setIsActionMenuOpen(true);
+                     }, 500);
+                     target.dataset.timer = timer.toString();
+                   }}
+                   onPointerUp={(e) => {
+                     const target = e.currentTarget;
+                     clearTimeout(parseInt(target.dataset.timer || '0'));
+                     if (target.dataset.longpress !== 'true') {
+                        setAddType('expense');
+                        setIsAddOpen(true);
+                        setIsActionMenuOpen(false);
+                     }
+                     delete target.dataset.longpress;
+                   }}
+                   onPointerLeave={(e) => {
+                     const target = e.currentTarget;
+                     clearTimeout(parseInt(target.dataset.timer || '0'));
+                     delete target.dataset.longpress;
+                   }}
                    className={`w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 ${isActionMenuOpen ? 'bg-slate-900 rotate-45' : 'bg-indigo-600 shadow-indigo-600/20'}`}
                  >
                    <Plus size={24} strokeWidth={2.5} />

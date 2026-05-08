@@ -6,11 +6,11 @@ import { useFinanceData } from '../hooks/useFinanceData'
 import { useUI } from '../contexts/UIContext'
 
 export function AddTransaction({ onClose, editingTransaction }: { onClose: () => void, editingTransaction?: any }) {
-  const { setBottomNavVisible } = useUI()
+  const { setBottomNavVisible, addType } = useUI()
   const { user, householdId } = useAuth()
   const { refreshData, categories, deleteTransaction } = useFinanceData()
   
-  const [type, setType] = useState(editingTransaction?.type || 'expense')
+  const [type, setType] = useState(editingTransaction?.type || addType || 'expense')
   const [amount, setAmount] = useState<string>(editingTransaction?.amount?.toString() || '')
   const [description, setDescription] = useState(editingTransaction?.description || '')
   const [categoryName, setCategoryName] = useState('Geral')
