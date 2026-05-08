@@ -129,7 +129,6 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
                 <span className="text-2xl font-bold text-slate-300">R$</span>
                 <input 
                    type="number" 
-                   autoFocus
                    placeholder="0,00"
                    value={amount}
                    onChange={e => setAmount(e.target.value)}

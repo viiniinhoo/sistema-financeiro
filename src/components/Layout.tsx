@@ -1,4 +1,4 @@
-import { ArrowRightLeft, LayoutDashboard, Target, Calculator, ListTree, User as UserIcon, BarChart3, Menu, PanelLeftClose, Plus } from 'lucide-react'
+import { ArrowRightLeft, LayoutDashboard, Target, Calculator, ListTree, User as UserIcon, BarChart3, Menu, PanelLeftClose, Plus, LayoutGrid } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AddTransaction } from './AddTransaction'
@@ -93,15 +93,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Floating Action Menu */}
             {isActionMenuOpen && (
               <div className="absolute bottom-24 right-6 flex flex-col items-end gap-3 z-[120]">
-                 <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[200ms]">
-                   <FloatingActionItem to="/analise" onClick={() => setIsActionMenuOpen(false)} icon={<BarChart3 size={18} />} label="Gráficos" />
-                 </div>
-                 <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[100ms]">
-                   <FloatingActionItem to="/contas-fixas" onClick={() => setIsActionMenuOpen(false)} icon={<ArrowRightLeft size={18} />} label="Calendário" />
-                 </div>
-                 <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both">
-                   <FloatingActionItem to="/calculadora" onClick={() => setIsActionMenuOpen(false)} icon={<Calculator size={18} />} label="Simulador" />
-                 </div>
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both">
+                    <FloatingActionItem to="/metas" onClick={() => setIsActionMenuOpen(false)} icon={<Target size={18} />} label="Metas" />
+                  </div>
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[100ms]">
+                    <FloatingActionItem to="/analise" onClick={() => setIsActionMenuOpen(false)} icon={<BarChart3 size={18} />} label="Gráficos" />
+                  </div>
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[200ms]">
+                    <FloatingActionItem to="/contas-fixas" onClick={() => setIsActionMenuOpen(false)} icon={<ArrowRightLeft size={18} />} label="Calendário" />
+                  </div>
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[300ms]">
+                    <FloatingActionItem to="/calculadora" onClick={() => setIsActionMenuOpen(false)} icon={<Calculator size={18} />} label="Simulador" />
+                  </div>
               </div>
             )}
 
@@ -114,38 +117,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
               
               {/* Central FAB */}
               <div className="px-2 flex items-center justify-center">
-                 <button 
-                   onPointerDown={(e) => {
-                     const target = e.currentTarget;
-                     const timer = setTimeout(() => {
-                       target.dataset.longpress = 'true';
-                       setIsActionMenuOpen(true);
-                     }, 500);
-                     target.dataset.timer = timer.toString();
-                   }}
-                   onPointerUp={(e) => {
-                     const target = e.currentTarget;
-                     clearTimeout(parseInt(target.dataset.timer || '0'));
-                     if (target.dataset.longpress !== 'true') {
-                        setAddType('expense');
-                        setIsAddOpen(true);
-                        setIsActionMenuOpen(false);
-                     }
-                     delete target.dataset.longpress;
-                   }}
-                   onPointerLeave={(e) => {
-                     const target = e.currentTarget;
-                     clearTimeout(parseInt(target.dataset.timer || '0'));
-                     delete target.dataset.longpress;
-                   }}
-                   className={`w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 ${isActionMenuOpen ? 'bg-slate-900 rotate-45' : 'bg-indigo-600 shadow-indigo-600/20'}`}
-                 >
-                   <Plus size={24} strokeWidth={2.5} />
-                 </button>
+                  <button 
+                    onClick={() => {
+                      setAddType('expense');
+                      setIsAddOpen(true);
+                      setIsActionMenuOpen(false);
+                    }}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 bg-indigo-600 shadow-indigo-600/20`}
+                  >
+                    <Plus size={24} strokeWidth={2.5} />
+                  </button>
               </div>
 
               <NavItem to="/categorias" active={location.pathname === '/categorias'} icon={<ListTree size={20} />} label="Orçamento" onClick={() => setIsActionMenuOpen(false)} />
-              <NavItem to="/metas" active={location.pathname === '/metas'} icon={<Target size={20} />} label="Metas" onClick={() => setIsActionMenuOpen(false)} />
+               <div 
+                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                 className={`flex flex-col items-center justify-center gap-1 flex-1 py-1 rounded-2xl transition-all cursor-pointer ${isActionMenuOpen ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+               >
+                 <LayoutGrid size={20} />
+                 <span className="text-[10px] font-bold">Mais</span>
+               </div>
             </nav>
           </div>
         )}
