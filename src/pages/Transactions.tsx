@@ -166,7 +166,7 @@ function TransactionRow({ transaction, categories, onEdit }: { transaction: any,
            <p className="text-xs font-bold text-slate-700 leading-tight">{transaction.description}</p>
            <div className="flex items-center gap-2 mt-0.5">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{categoryName}</p>
-              {transaction.payment_method && (
+              {!isIncome && transaction.payment_method && (
                  <>
                    <span className="w-1 h-1 rounded-full bg-slate-200"></span>
                    <p className="text-[8px] font-black text-indigo-400 uppercase tracking-tighter bg-indigo-50 px-1 rounded">{transaction.payment_method}</p>
