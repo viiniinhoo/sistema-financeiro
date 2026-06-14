@@ -4,15 +4,47 @@ import { Link, useLocation } from 'react-router-dom'
 import { AddTransaction } from './AddTransaction'
 import { useUI } from '../contexts/UIContext'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
+import { LogOut, X, Mail, User, ShieldCheck, Edit2, Check, RotateCcw } from 'lucide-react'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { isBottomNavVisible, isAddOpen, setIsAddOpen, setAddType } = useUI()
+  const { user } = useAuth()
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [newName, setNewName] = useState(user?.user_metadata?.full_name || '')
+  const [isUpdating, setIsUpdating] = useState(false)
   const location = useLocation()
 
-    const nomeExibicao = "Minhas Finanças"
-    const inicial = "$"
+  const handleSignOut = async () => {
+    if (window.confirm('Deseja realmente sair da conta?')) {
+      await supabase.auth.signOut()
+      setIsActionMenuOpen(false)
+      setIsProfileOpen(false)
+    }
+  }
+
+  const handleUpdateName = async () => {
+    if (!newName.trim()) return
+    setIsUpdating(true)
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: newName }
+      })
+      if (error) throw error
+      setIsEditingName(false)
+    } catch (err) {
+      console.error('Erro ao atualizar nome:', err)
+      alert('Erro ao atualizar nome. Tente novamente.')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const nomeExibicao = "Minhas Finanças"
+  const inicial = "$"
 
   return (
     <div className="flex min-h-[100dvh] bg-white dark:bg-slate-950">
@@ -76,7 +108,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <span className="font-bold text-slate-900 dark:text-white capitalize">{nomeExibicao}</span>
             </div>
           </div>
-          <UserIcon size={20} className="text-slate-400" />
+          <button onClick={() => setIsProfileOpen(true)} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+            <UserIcon size={20} />
+          </button>
         </nav>
 
         <main className="flex-1 animate-in fade-in duration-500 max-w-7xl mx-auto w-full">
@@ -104,6 +138,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </div>
                   <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[300ms]">
                     <FloatingActionItem to="/calculadora" onClick={() => setIsActionMenuOpen(false)} icon={<Calculator size={18} />} label="Simulador" />
+                  </div>
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[400ms]">
+                    <button 
+                      onClick={handleSignOut}
+                      className="flex items-center gap-3 bg-rose-50/90 dark:bg-rose-900/40 backdrop-blur-xl border border-rose-100 dark:border-rose-800 px-5 py-3 rounded-full shadow-xl hover:bg-rose-100 transition-all font-bold text-sm whitespace-nowrap min-w-[150px] active:scale-95 group text-rose-600"
+                    >
+                      <UserIcon size={18} />
+                      Sair da Conta
+                    </button>
                   </div>
               </div>
             )}
@@ -148,6 +191,94 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {isAddOpen && <AddTransaction onClose={() => setIsAddOpen(false)} />}
+      
+      {/* Profile Modal */}
+      {isProfileOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsProfileOpen(false)} />
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative z-10 animate-in zoom-in slide-in-from-bottom-10 duration-500">
+             <button onClick={() => setIsProfileOpen(false)} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <X size={20} />
+             </button>
+             
+             <div className="flex flex-col items-center text-center mb-8">
+                <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/20 mb-4 relative group/avatar">
+                  <User size={32} />
+                  {!isEditingName && (
+                    <button 
+                      onClick={() => {
+                        setNewName(user?.user_metadata?.full_name || '')
+                        setIsEditingName(true)
+                      }}
+                      className="absolute -bottom-1 -right-1 w-8 h-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 flex items-center justify-center text-indigo-600 hover:scale-110 transition-transform"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                  )}
+                </div>
+                
+                {isEditingName ? (
+                  <div className="w-full space-y-3 animate-in slide-in-from-top-2">
+                    <input 
+                      type="text" 
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      placeholder="Seu nome completo"
+                      autoFocus
+                      className="w-full text-center px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-indigo-500/30 rounded-xl text-slate-900 dark:text-white font-bold outline-none ring-2 ring-indigo-500/10"
+                    />
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setIsEditingName(false)}
+                        disabled={isUpdating}
+                        className="flex-1 py-2 px-4 bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        onClick={handleUpdateName}
+                        disabled={isUpdating || !newName.trim()}
+                        className="flex-1 py-2 px-4 bg-indigo-600 text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isUpdating ? <RotateCcw size={14} className="animate-spin" /> : <Check size={14} />}
+                        Salvar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                      {user?.user_metadata?.full_name || 'Usuário'}
+                    </h2>
+                    <p className="text-slate-500 font-medium text-sm flex items-center gap-1.5 mt-1">
+                      <Mail size={12} /> {user?.email}
+                    </p>
+                  </>
+                )}
+             </div>
+
+             <div className="space-y-3 mb-8">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center gap-4 border border-slate-100 dark:border-slate-800/50">
+                   <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                      <ShieldCheck size={20} />
+                   </div>
+                   <div className="flex-1 text-left">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status da Conta</p>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Verificada</p>
+                   </div>
+                </div>
+             </div>
+
+             <button 
+               onClick={handleSignOut}
+               className="w-full py-4 px-6 bg-rose-500 hover:bg-rose-600 text-white font-black rounded-2xl shadow-xl shadow-rose-900/10 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group uppercase tracking-widest text-xs"
+             >
+               <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+               Sair do Sistema
+             </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

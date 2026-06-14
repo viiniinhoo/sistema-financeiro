@@ -27,6 +27,12 @@ export function Transactions() {
       return matchesSearch && matchesFilter && matchesPayment && isInMonth
     })
   }, [transactions, searchTerm, filterType, paymentMethodFilter, selectedDate])
+  
+  const totalValue = useMemo(() => {
+    return filteredTransactions.reduce((acc, t) => {
+      return acc + (t.type === 'income' ? t.amount : -t.amount)
+    }, 0)
+  }, [filteredTransactions])
 
   const handlePrevMonth = () => setSelectedDate(prev => subMonths(prev, 1))
   const handleNextMonth = () => setSelectedDate(prev => addMonths(prev, 1))
@@ -49,7 +55,9 @@ export function Transactions() {
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900 leading-none">Extrato</h1>
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Movimentações</p>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
+            Movimentações <span className="opacity-40">•</span> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}
+          </p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -200,6 +208,12 @@ function TransactionRow({ transaction, categories, onEdit }: { transaction: any,
                  <>
                    <span className="w-1 h-1 rounded-full bg-slate-200"></span>
                    <p className="text-[8px] font-black text-indigo-400 uppercase tracking-tighter bg-indigo-50 px-1 rounded">{transaction.payment_method}</p>
+                 </>
+              )}
+              {transaction.created_by && (
+                 <>
+                   <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter bg-slate-100 px-1 rounded">{transaction.created_by.split(' ')[0]}</p>
                  </>
               )}
            </div>

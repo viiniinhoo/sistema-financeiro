@@ -19,8 +19,8 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
-  const [householdId, setHouseholdId] = useState<string | null>('11111111-1111-1111-1111-111111111111')
-  const [loading, setLoading] = useState(false)
+  const [householdId, setHouseholdId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (session?.user) {
         fetchHouseholdId(session.user.id)
       } else {
-        // setHouseholdId(null) // Keep mock active for testing
+        setHouseholdId(null)
         setLoading(false)
       }
     })
@@ -56,11 +56,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single()
       
       if (error) {
-        console.error('Erro de permissão no Supabase:', error.message)
+        console.warn('Vínculo não encontrado ou erro, usando ID legado p/ dados antigos')
+        setHouseholdId('11111111-1111-1111-1111-111111111111')
       } else if (data) {
         setHouseholdId(data.household_id)
       } else {
-        console.warn('Usuário não vinculado a uma household.')
+        setHouseholdId('11111111-1111-1111-1111-111111111111')
       }
     } catch (err) {
       console.error('Erro ao buscar household:', err)

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { Login } from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import { Transactions } from './pages/Transactions'
@@ -11,7 +11,20 @@ import { FixedBills } from './pages/FixedBills'
 import { Layout } from './components/Layout'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  // Bypassed for testing as requested
+  const { session, loading } = useAuth()
+  
+  if (loading) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-white dark:bg-slate-950">
+        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+  
+  if (!session) {
+    return <Navigate to="/login" replace />
+  }
+  
   return <>{children}</>
 }
 
