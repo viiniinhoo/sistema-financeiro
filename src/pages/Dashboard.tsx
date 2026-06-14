@@ -52,7 +52,9 @@ export default function Dashboard() {
       return { ...cat, spent }
     })
 
-    return relevantCategories.filter(cat => cat.type === 'expense' && cat.spent > 0)
+    return relevantCategories
+      .filter(cat => cat.type === 'expense' && cat.spent > 0)
+      .sort((a, b) => b.spent - a.spent)
   }, [categories, transactions, selectedDate])
 
   const handlePrevMonth = () => setSelectedDate(prev => subMonths(prev, 1))
@@ -213,7 +215,7 @@ function CategoryDetailsModal({ category, transactions, date, onClose }: any) {
       const isInCategory = category.isAll ? t.type === 'expense' : (t.category_id === category.id || t.category === category.name)
       const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
       return isInCategory && isInMonth
-    }).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    }).sort((a: any, b: any) => (b.amount || 0) - (a.amount || 0))
   }, [transactions, category, start, end])
 
   return (

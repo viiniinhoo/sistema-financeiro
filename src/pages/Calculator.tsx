@@ -2,15 +2,28 @@ import { TrendingUp, Info } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export function Calculator() {
-  const [initial, setInitial] = useState(1000)
-  const [monthly, setMonthly] = useState(200)
-  const [rate, setRate] = useState(1)
-  const [months, setMonths] = useState(24)
+  const [initial, setInitial] = useState<number | string>('')
+  const [monthly, setMonthly] = useState<number | string>('')
+  const [rate, setRate] = useState<number | string>('')
+  const [months, setMonths] = useState<number | string>('')
   const [result, setResult] = useState<any>(null)
 
   useEffect(() => {
-    const final = initial * Math.pow(1 + rate / 100, months) + monthly * ((Math.pow(1 + rate / 100, months) - 1) / (rate / 100))
-    const invested = initial + (monthly * months)
+    const valInitial = Number(initial) || 0
+    const valMonthly = Number(monthly) || 0
+    const valRate = Number(rate) || 0
+    const valMonths = Number(months) || 0
+
+    let final = 0
+    const r = valRate / 100
+    
+    if (r === 0) {
+      final = valInitial + (valMonthly * valMonths)
+    } else {
+      final = valInitial * Math.pow(1 + r, valMonths) + valMonthly * ((Math.pow(1 + r, valMonths) - 1) / r)
+    }
+
+    const invested = valInitial + (valMonthly * valMonths)
     const interest = final - invested
     setResult({ final, invested, interest })
   }, [initial, monthly, rate, months])
@@ -74,7 +87,7 @@ function CalcInput({ label, value, onChange, suffix }: any) {
         <input 
           type="number" 
           value={value} 
-          onChange={e => onChange(Number(e.target.value))} 
+          onChange={e => onChange(e.target.value)} 
           className="w-full text-lg font-bold outline-none text-slate-800 bg-transparent"
         />
         <span className="text-slate-300 font-bold text-xs">{suffix}</span>

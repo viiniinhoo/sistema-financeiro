@@ -9,6 +9,7 @@ export function Transactions() {
   const { transactions, categories } = useFinanceData()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all')
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState<'all' | 'Pix' | 'Débito' | 'Crédito'>('all')
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<any>(null)
 
@@ -21,10 +22,11 @@ export function Transactions() {
     return transactions.filter(t => {
       const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesFilter = filterType === 'all' || t.type === filterType
+      const matchesPayment = paymentMethodFilter === 'all' || t.payment_method === paymentMethodFilter
       const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
-      return matchesSearch && matchesFilter && isInMonth
+      return matchesSearch && matchesFilter && matchesPayment && isInMonth
     })
-  }, [transactions, searchTerm, filterType, selectedDate])
+  }, [transactions, searchTerm, filterType, paymentMethodFilter, selectedDate])
 
   const handlePrevMonth = () => setSelectedDate(prev => subMonths(prev, 1))
   const handleNextMonth = () => setSelectedDate(prev => addMonths(prev, 1))
@@ -80,9 +82,22 @@ export function Transactions() {
          <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
             <FilterBtn active={filterType === 'all'} onClick={() => setFilterType('all')} icon={<Calendar size={14} />} />
             <FilterBtn active={filterType === 'expense'} onClick={() => setFilterType('expense')} icon={<ArrowDownLeft size={14} className="text-rose-500" />} />
-            <FilterBtn active={filterType === 'income'} onClick={() => setFilterType('income')} icon={<ArrowUpRight size={14} className="text-emerald-500" />} />
+            <FilterBtn active={filterType === 'income'} onClick={() => {
+              setFilterType('income')
+              setPaymentMethodFilter('all')
+            }} icon={<ArrowUpRight size={14} className="text-emerald-500" />} />
          </div>
       </div>
+
+      {/* Payment Method Filter - Mobile Optimized */}
+      {filterType !== 'income' && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide -mx-2 px-2">
+           <PaymentChip active={paymentMethodFilter === 'all'} onClick={() => setPaymentMethodFilter('all')} label="Todos" />
+           <PaymentChip active={paymentMethodFilter === 'Pix'} onClick={() => setPaymentMethodFilter('Pix')} label="Pix" />
+           <PaymentChip active={paymentMethodFilter === 'Débito'} onClick={() => setPaymentMethodFilter('Débito')} label="Débito" />
+           <PaymentChip active={paymentMethodFilter === 'Crédito'} onClick={() => setPaymentMethodFilter('Crédito')} label="Crédito" />
+        </div>
+      )}
 
       <div className="space-y-8">
         {sortedDates.map(dateKey => (
@@ -147,6 +162,21 @@ function FilterBtn({ active, icon, onClick }: any) {
          {icon}
       </button>
    )
+}
+
+function PaymentChip({ active, label, onClick }: any) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight transition-all border whitespace-nowrap ${
+        active 
+          ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200' 
+          : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-200'
+      }`}
+    >
+      {label}
+    </button>
+  )
 }
 
 function TransactionRow({ transaction, categories, onEdit }: { transaction: any, categories: any[], onEdit: () => void }) {
