@@ -139,15 +139,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[300ms]">
                     <FloatingActionItem to="/calculadora" onClick={() => setIsActionMenuOpen(false)} icon={<Calculator size={18} />} label="Simulador" />
                   </div>
-                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[400ms]">
-                    <button 
-                      onClick={handleSignOut}
-                      className="flex items-center gap-3 bg-rose-50/90 dark:bg-rose-900/40 backdrop-blur-xl border border-rose-100 dark:border-rose-800 px-5 py-3 rounded-full shadow-xl hover:bg-rose-100 transition-all font-bold text-sm whitespace-nowrap min-w-[150px] active:scale-95 group text-rose-600"
-                    >
-                      <UserIcon size={18} />
-                      Sair da Conta
-                    </button>
-                  </div>
               </div>
             )}
 
