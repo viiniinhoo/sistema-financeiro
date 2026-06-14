@@ -55,8 +55,8 @@ export function Transactions() {
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900 leading-none">Extrato</h1>
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
-            Movimentações <span className="opacity-40">•</span> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}
+          <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest mt-1 flex items-center gap-2 whitespace-nowrap">
+            Movimentações <span className="opacity-40">•</span> <span className="text-slate-600 dark:text-slate-300">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}</span>
           </p>
         </div>
         
