@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, Search, Calendar, Plus } from 'lucide-react'
+import { ArrowUpRight, ArrowDownLeft, ChevronRight, ChevronLeft, Search, Calendar, Plus, SlidersHorizontal } from 'lucide-react'
 import { useFinanceData } from '../hooks/useFinanceData'
 import { format, startOfMonth, endOfMonth, isWithinInterval, addMonths, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -12,8 +12,22 @@ export function Transactions() {
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<'all' | 'Pix' | 'Débito' | 'Crédito'>('all')
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<any>(null)
-
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [creatorFilter, setCreatorFilter] = useState<string>('all')
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+
+  const creators = useMemo(() => {
+    const list = transactions
+      .map(t => t.created_by)
+      .filter(Boolean)
+      .map(name => {
+        if (name.includes('@')) {
+          return name.split('@')[0]
+        }
+        return name.split(' ')[0]
+      })
+    return Array.from(new Set(list))
+  }, [transactions])
 
   const filteredTransactions = useMemo(() => {
     const start = startOfMonth(selectedDate)
@@ -24,9 +38,15 @@ export function Transactions() {
       const matchesFilter = filterType === 'all' || t.type === filterType
       const matchesPayment = paymentMethodFilter === 'all' || t.payment_method === paymentMethodFilter
       const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
-      return matchesSearch && matchesFilter && matchesPayment && isInMonth
+      
+      const createdByClean = t.created_by 
+        ? (t.created_by.includes('@') ? t.created_by.split('@')[0] : t.created_by.split(' ')[0])
+        : ''
+      const matchesCreator = creatorFilter === 'all' || createdByClean === creatorFilter
+
+      return matchesSearch && matchesFilter && matchesPayment && isInMonth && matchesCreator
     })
-  }, [transactions, searchTerm, filterType, paymentMethodFilter, selectedDate])
+  }, [transactions, searchTerm, filterType, paymentMethodFilter, selectedDate, creatorFilter])
   
   const totalValue = useMemo(() => {
     return filteredTransactions.reduce((acc, t) => {
@@ -87,6 +107,21 @@ export function Transactions() {
               className="bg-transparent outline-none w-full text-xs font-bold uppercase tracking-tight" 
             />
          </div>
+         <button 
+           type="button"
+           onClick={() => setShowAdvancedFilters(prev => !prev)}
+           className={`px-3.5 rounded-2xl flex items-center justify-center border transition-all ${
+             showAdvancedFilters || paymentMethodFilter !== 'all' || creatorFilter !== 'all'
+               ? 'bg-indigo-50 border-indigo-200 text-indigo-600' 
+               : 'bg-white border-slate-100 text-slate-400 hover:text-slate-600'
+           }`}
+         >
+           <SlidersHorizontal size={16} />
+           {(paymentMethodFilter !== 'all' || creatorFilter !== 'all') && (
+             <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 ml-1.5"></span>
+           )}
+         </button>
+
          <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
             <FilterBtn active={filterType === 'all'} onClick={() => setFilterType('all')} icon={<Calendar size={14} />} />
             <FilterBtn active={filterType === 'expense'} onClick={() => setFilterType('expense')} icon={<ArrowDownLeft size={14} className="text-rose-500" />} />
@@ -97,13 +132,35 @@ export function Transactions() {
          </div>
       </div>
 
-      {/* Payment Method Filter - Mobile Optimized */}
-      {filterType !== 'income' && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide -mx-2 px-2">
-           <PaymentChip active={paymentMethodFilter === 'all'} onClick={() => setPaymentMethodFilter('all')} label="Todos" />
-           <PaymentChip active={paymentMethodFilter === 'Pix'} onClick={() => setPaymentMethodFilter('Pix')} label="Pix" />
-           <PaymentChip active={paymentMethodFilter === 'Débito'} onClick={() => setPaymentMethodFilter('Débito')} label="Débito" />
-           <PaymentChip active={paymentMethodFilter === 'Crédito'} onClick={() => setPaymentMethodFilter('Crédito')} label="Crédito" />
+      {/* Advanced Filters Panel */}
+      {showAdvancedFilters && (
+        <div className="bg-slate-50/50 border border-slate-100 p-4 rounded-3xl mb-8 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          {/* Payment Method Filter - Mobile Optimized */}
+          {filterType !== 'income' && (
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-2 px-2">
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight ml-2">Pagamento:</span>
+               <PaymentChip active={paymentMethodFilter === 'all'} onClick={() => setPaymentMethodFilter('all')} label="Todos" />
+               <PaymentChip active={paymentMethodFilter === 'Pix'} onClick={() => setPaymentMethodFilter('Pix')} label="Pix" />
+               <PaymentChip active={paymentMethodFilter === 'Débito'} onClick={() => setPaymentMethodFilter('Débito')} label="Débito" />
+               <PaymentChip active={paymentMethodFilter === 'Crédito'} onClick={() => setPaymentMethodFilter('Crédito')} label="Crédito" />
+            </div>
+          )}
+
+          {/* Filtro por Responsável */}
+          {creators.length > 0 && (
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-2 px-2">
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight ml-2">Responsável:</span>
+               <PaymentChip active={creatorFilter === 'all'} onClick={() => setCreatorFilter('all')} label="Todos" />
+               {creators.map(creator => (
+                 <PaymentChip 
+                   key={creator} 
+                   active={creatorFilter === creator} 
+                   onClick={() => setCreatorFilter(creator)} 
+                   label={creator} 
+                 />
+               ))}
+            </div>
+          )}
         </div>
       )}
 

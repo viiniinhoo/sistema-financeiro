@@ -18,6 +18,7 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
   const [installments, setInstallments] = useState<number>(editingTransaction?.installment_total || 1)
   const [paymentMethod, setPaymentMethod] = useState(editingTransaction?.payment_method || 'Pix')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const filteredCategories = useMemo(() => {
     return categories.filter(c => c.type === type)
@@ -93,16 +94,23 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
     }
   }
 
-  const handleDelete = async () => {
-    if (window.confirm('⚠️ Excluir este lançamento permanentemente?')) {
-      setIsSubmitting(true)
-      const success = await deleteTransaction(editingTransaction.id)
-      if (success) {
-        onClose()
-      } else {
-        alert('Erro ao excluir')
-        setIsSubmitting(false)
-      }
+  const handleDelete = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async (deleteAll: boolean) => {
+    setShowDeleteConfirm(false)
+    setIsSubmitting(true)
+    const success = await deleteTransaction(
+      editingTransaction.id,
+      editingTransaction.installment_group_id,
+      deleteAll
+    )
+    if (success) {
+      onClose()
+    } else {
+      alert('Erro ao excluir')
+      setIsSubmitting(false)
     }
   }
   
@@ -258,6 +266,66 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
           </button>
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 text-center animate-in scale-in duration-300" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={24} />
+            </div>
+            
+            {editingTransaction?.installment_group_id ? (
+              <>
+                <h3 className="text-base font-black text-slate-800 mb-2">Excluir Compra</h3>
+                <p className="text-xs font-semibold text-slate-400 leading-relaxed mb-6">
+                  Esta transação faz parte de um parcelamento. Deseja excluir apenas esta parcela ou todas as parcelas desta compra?
+                </p>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => confirmDelete(true)}
+                    className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-600/10 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
+                  >
+                    Excluir Todas as Parcelas
+                  </button>
+                  <button
+                    onClick={() => confirmDelete(false)}
+                    className="w-full py-3.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-black rounded-2xl border border-slate-100 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
+                  >
+                    Excluir Apenas Esta Parcela
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="w-full py-3 text-slate-400 font-bold text-xs uppercase tracking-wider hover:text-slate-600 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="text-base font-black text-slate-800 mb-2">Excluir Registro</h3>
+                <p className="text-xs font-semibold text-slate-400 leading-relaxed mb-6">
+                  Tem certeza que deseja excluir este lançamento permanentemente? Esta ação não pode ser desfeita.
+                </p>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => confirmDelete(false)}
+                    className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-600/10 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
+                  >
+                    Excluir Lançamento
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="w-full py-3.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-black rounded-2xl border border-slate-100 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

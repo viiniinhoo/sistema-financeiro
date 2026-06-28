@@ -205,11 +205,21 @@ export function useFinanceData() {
     } catch (e) { return false }
   }
 
-  const deleteTransaction = async (id: string) => {
+  const deleteTransaction = async (id: string, groupId?: string | null, deleteAll?: boolean) => {
     try {
-      const { error } = await supabase.from('transactions').delete().eq('id', id)
+      let query = supabase.from('transactions').delete()
+      if (deleteAll && groupId) {
+        query = query.eq('installment_group_id', groupId)
+      } else {
+        query = query.eq('id', id)
+      }
+      const { error } = await query
       if (error) {
-        setTransactions(prev => prev.filter(t => t.id !== id))
+        if (deleteAll && groupId) {
+          setTransactions(prev => prev.filter(t => t.installment_group_id !== groupId))
+        } else {
+          setTransactions(prev => prev.filter(t => t.id !== id))
+        }
         return true
       }
       await refreshData()
