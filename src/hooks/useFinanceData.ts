@@ -38,6 +38,52 @@ export function useFinanceData() {
   const [subscriptions, setSubscriptions] = useState<any[]>(MOCK_SUBSCRIPTIONS)
   const [isSyncing, setIsSyncing] = useState(false)
 
+  const autoSyncSubscriptionsToTransactions = async (
+    activeSubs: any[],
+    currentTransactions: any[],
+    hid: string | null
+  ) => {
+    if (!activeSubs || activeSubs.length === 0) return
+
+    const now = new Date()
+    const currentYearMonth = format(now, 'yyyy-MM')
+    const newTransactionsToInsert: any[] = []
+
+    for (const sub of activeSubs) {
+      if (sub.is_active === false) continue
+
+      const dayNum = parseInt(sub.billing_day, 10) || 1
+      const dayStr = Math.min(31, Math.max(1, dayNum)).toString().padStart(2, '0')
+      const targetDate = `${currentYearMonth}-${dayStr}`
+
+      const alreadyExists = currentTransactions.some(
+        t => t.description.toLowerCase() === sub.name.toLowerCase() &&
+             t.date.startsWith(currentYearMonth) &&
+             t.type === 'expense'
+      )
+
+      if (!alreadyExists) {
+        newTransactionsToInsert.push({
+          description: sub.name,
+          amount: Number(sub.amount) || 0,
+          category: sub.category || 'Geral',
+          date: targetDate,
+          type: 'expense',
+          payment_method: 'Crédito',
+          household_id: hid,
+          created_by: 'Assinatura'
+        })
+      }
+    }
+
+    if (newTransactionsToInsert.length > 0) {
+      const { data, error } = await supabase.from('transactions').insert(newTransactionsToInsert).select()
+      if (!error && data && data.length > 0) {
+        setTransactions(prev => [...data, ...prev])
+      }
+    }
+  }
+
   const refreshData = async () => {
     if (!householdId) return
     
@@ -57,13 +103,21 @@ export function useFinanceData() {
           : await supabase.from('subscriptions').select('*')
       }
 
-      if (transRes.data && transRes.data.length > 0) setTransactions(transRes.data)
+      const currentTrans = transRes.data || []
+      const currentSubs = subsRes.data || []
+
+      if (currentTrans.length > 0) setTransactions(currentTrans)
       if (catRes.data && catRes.data.length > 0) setCategories(catRes.data)
       else if (catRes.data && catRes.data.length === 0 && categories.length > 0 && categories[0].id.length > 5) setCategories([])
       
       if (goalRes.data) setGoals(goalRes.data)
       if (billsRes.data && billsRes.data.length > 0) setFixedBills(billsRes.data)
-      if (subsRes.data) setSubscriptions(subsRes.data)
+      if (currentSubs) setSubscriptions(currentSubs)
+
+      // Sync active subscriptions to extrato automatically
+      if (currentSubs.length > 0) {
+        await autoSyncSubscriptionsToTransactions(currentSubs, currentTrans, householdId)
+      }
       
     } catch (error) {
       console.log('Background sync error', error)
