@@ -270,18 +270,30 @@ export function useFinanceData() {
     } catch (e) { return false }
   }
 
-  const deleteTransaction = async (id: string, groupId?: string | null, deleteAll?: boolean) => {
+  const deleteTransaction = async (
+    id: string,
+    groupId?: string | null,
+    scope: 'single' | 'future' | 'all' = 'single',
+    currentInstallmentIndex?: number
+  ) => {
     try {
       let query = supabase.from('transactions').delete()
-      if (deleteAll && groupId) {
+
+      if (groupId && scope === 'all') {
         query = query.eq('installment_group_id', groupId)
+      } else if (groupId && scope === 'future' && currentInstallmentIndex) {
+        query = query.eq('installment_group_id', groupId).gte('installment_current', currentInstallmentIndex)
       } else {
         query = query.eq('id', id)
       }
+
       const { error } = await query
+
       if (error) {
-        if (deleteAll && groupId) {
+        if (groupId && scope === 'all') {
           setTransactions(prev => prev.filter(t => t.installment_group_id !== groupId))
+        } else if (groupId && scope === 'future' && currentInstallmentIndex) {
+          setTransactions(prev => prev.filter(t => !(t.installment_group_id === groupId && (t.installment_current || 0) >= currentInstallmentIndex)))
         } else {
           setTransactions(prev => prev.filter(t => t.id !== id))
         }

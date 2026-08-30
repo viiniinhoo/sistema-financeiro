@@ -110,13 +110,14 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
     setShowDeleteConfirm(true)
   }
 
-  const confirmDelete = async (deleteAll: boolean) => {
+  const confirmDelete = async (scope: 'single' | 'future' | 'all') => {
     setShowDeleteConfirm(false)
     setIsSubmitting(true)
     const success = await deleteTransaction(
       editingTransaction.id,
       editingTransaction.installment_group_id,
-      deleteAll
+      scope,
+      editingTransaction.installment_current
     )
     if (success) {
       onClose()
@@ -295,26 +296,32 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
             
             {editingTransaction?.installment_group_id ? (
               <>
-                <h3 className="text-base font-black text-slate-800 mb-2">Excluir Compra</h3>
+                <h3 className="text-base font-black text-slate-800 mb-2">Excluir Compra Parcelada</h3>
                 <p className="text-xs font-semibold text-slate-400 leading-relaxed mb-6">
-                  Esta transação faz parte de um parcelamento. Deseja excluir apenas esta parcela ou todas as parcelas desta compra?
+                  Esta transação possui outras parcelas vinculadas. Como você gostaria de aplicar esta exclusão?
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <button
-                    onClick={() => confirmDelete(true)}
-                    className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-600/10 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
+                    onClick={() => confirmDelete('single')}
+                    className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-black rounded-2xl text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
                   >
-                    Excluir Todas as Parcelas
+                    Apenas Esta Parcela
                   </button>
                   <button
-                    onClick={() => confirmDelete(false)}
-                    className="w-full py-3.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-black rounded-2xl border border-slate-100 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
+                    onClick={() => confirmDelete('future')}
+                    className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-600/20 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
                   >
-                    Excluir Apenas Esta Parcela
+                    Esta e as Próximas
+                  </button>
+                  <button
+                    onClick={() => confirmDelete('all')}
+                    className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-2xl text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
+                  >
+                    Todas as Parcelas do Grupo
                   </button>
                   <button
                     onClick={() => setShowDeleteConfirm(false)}
-                    className="w-full py-3 text-slate-400 font-bold text-xs uppercase tracking-wider hover:text-slate-600 transition-colors"
+                    className="w-full py-2.5 text-slate-400 font-bold text-xs uppercase tracking-wider hover:text-slate-600 transition-colors pt-1"
                   >
                     Cancelar
                   </button>
@@ -328,7 +335,7 @@ export function AddTransaction({ onClose, editingTransaction }: { onClose: () =>
                 </p>
                 <div className="space-y-3">
                   <button
-                    onClick={() => confirmDelete(false)}
+                    onClick={() => confirmDelete('single')}
                     className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-600/10 text-xs uppercase tracking-wider transition-all active:scale-[0.98]"
                   >
                     Excluir Lançamento
