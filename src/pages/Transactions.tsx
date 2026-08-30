@@ -13,6 +13,7 @@ export function Transactions() {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<any>(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [dateScope, setDateScope] = useState<'upToToday' | 'fullMonth'>('upToToday')
   const [creatorFilter, setCreatorFilter] = useState<string>('all')
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
 
@@ -32,6 +33,7 @@ export function Transactions() {
   const filteredTransactions = useMemo(() => {
     const start = startOfMonth(selectedDate)
     const end = endOfMonth(selectedDate)
+    const todayStr = format(new Date(), 'yyyy-MM-dd')
 
     return transactions.filter(t => {
       const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -39,14 +41,17 @@ export function Transactions() {
       const matchesPayment = paymentMethodFilter === 'all' || t.payment_method === paymentMethodFilter
       const isInMonth = isWithinInterval(new Date(t.date + 'T12:00:00'), { start, end })
       
+      // Filtro até o dia atual
+      const isBeforeOrToday = dateScope === 'fullMonth' || t.date <= todayStr
+
       const createdByClean = t.created_by 
         ? (t.created_by.includes('@') ? t.created_by.split('@')[0] : t.created_by.split(' ')[0])
         : ''
       const matchesCreator = creatorFilter === 'all' || createdByClean === creatorFilter
 
-      return matchesSearch && matchesFilter && matchesPayment && isInMonth && matchesCreator
+      return matchesSearch && matchesFilter && matchesPayment && isInMonth && isBeforeOrToday && matchesCreator
     })
-  }, [transactions, searchTerm, filterType, paymentMethodFilter, selectedDate, creatorFilter])
+  }, [transactions, searchTerm, filterType, paymentMethodFilter, selectedDate, dateScope, creatorFilter])
   
   const totalValue = useMemo(() => {
     return filteredTransactions.reduce((acc, t) => {
@@ -59,7 +64,6 @@ export function Transactions() {
 
   // Group transactions by date
   const groupedTransactions = filteredTransactions.reduce((groups: any, transaction) => {
-    // transaction.date já é YYYY-MM-DD do Supabase
     const dateKey = transaction.date ? transaction.date.split('T')[0] : new Date().toISOString().split('T')[0]
     if (!groups[dateKey]) {
       groups[dateKey] = []
@@ -72,20 +76,44 @@ export function Transactions() {
 
   return (
     <div className="px-6 py-8 pb-32 md:pb-12 max-w-4xl mx-auto w-full">
-      <header className="flex justify-between items-center mb-8">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 leading-none">Extrato</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">Extrato</h1>
           <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest mt-1 flex items-center gap-2 whitespace-nowrap">
             Movimentações <span className="opacity-40">•</span> <span className="text-slate-600 dark:text-slate-300">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}</span>
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
-           <div className="flex items-center bg-white border border-slate-100 p-1 rounded-full shadow-sm">
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+           {/* Scope Toggle (Até Hoje vs Mês Completo) */}
+           <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-full border border-slate-200/60 dark:border-slate-700">
+             <button
+               onClick={() => setDateScope('upToToday')}
+               className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight transition-all ${
+                 dateScope === 'upToToday'
+                   ? 'bg-indigo-600 text-white shadow-sm'
+                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
+               }`}
+             >
+               Até Hoje
+             </button>
+             <button
+               onClick={() => setDateScope('fullMonth')}
+               className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight transition-all ${
+                 dateScope === 'fullMonth'
+                   ? 'bg-indigo-600 text-white shadow-sm'
+                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
+               }`}
+             >
+               Mês Completo
+             </button>
+           </div>
+
+           <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-1 rounded-full shadow-sm">
               <button onClick={handlePrevMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
                 <ChevronLeft size={16} />
               </button>
-              <span className="text-[10px] font-black text-slate-800 px-2 min-w-[80px] text-center capitalize">
+              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 px-2 min-w-[80px] text-center capitalize">
                 {format(selectedDate, 'MMM yyyy', { locale: ptBR })}
               </span>
               <button onClick={handleNextMonth} className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">

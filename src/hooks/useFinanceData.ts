@@ -26,6 +26,8 @@ const MOCK_FIXED_BILLS = [
   { id: '3', name: 'Netflix', amount: 55.90, due_day: 5, is_paid: true, category: 'Lazer' }
 ]
 
+const MOCK_SUBSCRIPTIONS: any[] = []
+
 export function useFinanceData() {
   const { householdId } = useAuth()
   const [loading, setLoading] = useState(false)
@@ -33,6 +35,7 @@ export function useFinanceData() {
   const [categories, setCategories] = useState<any[]>(MOCK_CATEGORIES)
   const [goals, setGoals] = useState<any[]>([])
   const [fixedBills, setFixedBills] = useState<any[]>(MOCK_FIXED_BILLS)
+  const [subscriptions, setSubscriptions] = useState<any[]>(MOCK_SUBSCRIPTIONS)
   const [isSyncing, setIsSyncing] = useState(false)
 
   const refreshData = async () => {
@@ -40,19 +43,21 @@ export function useFinanceData() {
     
     setIsSyncing(true)
     try {
-      const [transRes, catRes, goalRes, billsRes] = await Promise.all([
+      const [transRes, catRes, goalRes, billsRes, subsRes] = await Promise.all([
         supabase.from('transactions').select('*').eq('household_id', householdId).order('date', { ascending: false }),
         supabase.from('categories').select('*').eq('household_id', householdId),
         supabase.from('goals').select('*').eq('household_id', householdId),
-        supabase.from('fixed_bills').select('*').eq('household_id', householdId)
+        supabase.from('fixed_bills').select('*').eq('household_id', householdId),
+        supabase.from('subscriptions').select('*').eq('household_id', householdId)
       ])
 
       if (transRes.data && transRes.data.length > 0) setTransactions(transRes.data)
       if (catRes.data && catRes.data.length > 0) setCategories(catRes.data)
-      else if (catRes.data && catRes.data.length === 0 && categories.length > 0 && categories[0].id.length > 5) setCategories([]) // Clear mock if cloud is empty
+      else if (catRes.data && catRes.data.length === 0 && categories.length > 0 && categories[0].id.length > 5) setCategories([])
       
       if (goalRes.data) setGoals(goalRes.data)
       if (billsRes.data && billsRes.data.length > 0) setFixedBills(billsRes.data)
+      if (subsRes.data && subsRes.data.length > 0) setSubscriptions(subsRes.data)
       
     } catch (error) {
       console.log('Background sync error', error)
@@ -272,6 +277,73 @@ export function useFinanceData() {
     } catch (e) { return false }
   }
 
+  const deleteSubscription = async (id: string) => {
+    try {
+      const { error } = await supabase.from('subscriptions').delete().eq('id', id)
+      if (error) {
+        setSubscriptions(prev => prev.filter(s => s.id !== id))
+        return true
+      }
+      await refreshData()
+      return true
+    } catch (e) { return false }
+  }
+
+  const upsertSubscription = async (sub: any) => {
+    try {
+      let res
+      const subData = {
+        name: sub.name,
+        amount: sub.amount,
+        billing_day: sub.billing_day,
+        category: sub.category,
+        icon: sub.icon || '💳',
+        is_active: sub.is_active !== undefined ? sub.is_active : true,
+        household_id: householdId
+      }
+
+      if (sub.id && sub.id.length > 5 && !sub.id.startsWith('sub-')) {
+        res = await supabase.from('subscriptions').update(subData).eq('id', sub.id)
+      } else {
+        res = await supabase.from('subscriptions').insert([subData])
+      }
+
+      if (res?.error) {
+        console.error('Supabase error:', res.error)
+        if (!sub.id || sub.id.startsWith('sub-') || sub.id.length <= 5) {
+          const newSub = { ...subData, id: 'temp-' + Math.random().toString(36).substr(2, 9) }
+          setSubscriptions(prev => [...prev, newSub])
+        } else {
+          setSubscriptions(prev => prev.map(s => s.id === sub.id ? { ...s, ...subData } : s))
+        }
+        return true
+      }
+      await refreshData()
+      return true
+    } catch (e) { 
+      // Fallback local update
+      if (!sub.id || sub.id.startsWith('sub-') || sub.id.length <= 5) {
+        const newSub = { ...sub, id: 'sub-' + Math.random().toString(36).substr(2, 9) }
+        setSubscriptions(prev => [...prev, newSub])
+      } else {
+        setSubscriptions(prev => prev.map(s => s.id === sub.id ? sub : s))
+      }
+      return true 
+    }
+  }
+
+  const toggleSubscriptionActive = async (id: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase.from('subscriptions').update({ is_active: isActive }).eq('id', id)
+      setSubscriptions(prev => prev.map(s => s.id === id ? { ...s, is_active: isActive } : s))
+      if (!error) await refreshData()
+      return true
+    } catch (e) {
+      setSubscriptions(prev => prev.map(s => s.id === id ? { ...s, is_active: isActive } : s))
+      return true
+    }
+  }
+
   useEffect(() => {
     refreshData()
   }, [householdId])
@@ -281,6 +353,7 @@ export function useFinanceData() {
     categories,
     goals,
     fixedBills,
+    subscriptions,
     loading,
     isSyncing,
     refreshData,
@@ -291,6 +364,9 @@ export function useFinanceData() {
     deleteGoal,
     deleteTransaction,
     deleteFixedBill,
-    upsertFixedBill
+    upsertFixedBill,
+    deleteSubscription,
+    upsertSubscription,
+    toggleSubscriptionActive
   }
 }

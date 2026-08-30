@@ -8,6 +8,7 @@ import { Calculator } from './pages/Calculator'
 import { Categories } from './pages/Categories'
 import Analytics from './pages/Analytics'
 import { FixedBills } from './pages/FixedBills'
+import { Subscriptions } from './pages/Subscriptions'
 import { Layout } from './components/Layout'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,7 @@ function App() {
             <Route path="/metas" element={<ProtectedRoute><Layout><Goals /></Layout></ProtectedRoute>} />
             <Route path="/calculadora" element={<ProtectedRoute><Layout><Calculator /></Layout></ProtectedRoute>} />
             <Route path="/contas-fixas" element={<ProtectedRoute><Layout><FixedBills /></Layout></ProtectedRoute>} />
+            <Route path="/assinaturas" element={<ProtectedRoute><Layout><Subscriptions /></Layout></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>

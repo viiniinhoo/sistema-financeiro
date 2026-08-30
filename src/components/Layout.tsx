@@ -1,4 +1,4 @@
-import { ArrowRightLeft, LayoutDashboard, Target, Calculator, ListTree, User as UserIcon, BarChart3, Menu, PanelLeftClose, Plus, LayoutGrid } from 'lucide-react'
+import { ArrowRightLeft, LayoutDashboard, Target, Calculator, ListTree, User as UserIcon, BarChart3, Menu, PanelLeftClose, Plus, LayoutGrid, Repeat } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AddTransaction } from './AddTransaction'
@@ -66,6 +66,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
          <div className="flex-1 flex flex-col gap-2">
             <DesktopNavItem to="/" active={location.pathname === '/'} icon={<LayoutDashboard size={20} />} label="Início" />
             <DesktopNavItem to="/transacoes" active={location.pathname === '/transacoes'} icon={<ArrowRightLeft size={20} />} label="Extrato" />
+            <DesktopNavItem to="/assinaturas" active={location.pathname === '/assinaturas'} icon={<Repeat size={20} />} label="Assinaturas" />
             <DesktopNavItem to="/analise" active={location.pathname === '/analise'} icon={<BarChart3 size={20} />} label="Gráficos" />
             <DesktopNavItem to="/categorias" active={location.pathname === '/categorias'} icon={<ListTree size={20} />} label="Orçamento" />
             <DesktopNavItem to="/metas" active={location.pathname === '/metas'} icon={<Target size={20} />} label="Metas" />
@@ -128,12 +129,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {isActionMenuOpen && (
               <div className="absolute bottom-24 right-6 flex flex-col items-end gap-3 z-[120]">
                   <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both">
+                    <FloatingActionItem to="/assinaturas" onClick={() => setIsActionMenuOpen(false)} icon={<Repeat size={18} />} label="Assinaturas" />
+                  </div>
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[75ms]">
                     <FloatingActionItem to="/metas" onClick={() => setIsActionMenuOpen(false)} icon={<Target size={18} />} label="Metas" />
                   </div>
-                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[100ms]">
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[150ms]">
                     <FloatingActionItem to="/analise" onClick={() => setIsActionMenuOpen(false)} icon={<BarChart3 size={18} />} label="Gráficos" />
                   </div>
-                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[200ms]">
+                  <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[225ms]">
                     <FloatingActionItem to="/contas-fixas" onClick={() => setIsActionMenuOpen(false)} icon={<ArrowRightLeft size={18} />} label="Calendário" />
                   </div>
                   <div className="animate-in slide-in-from-bottom-4 fade-in duration-300 fill-mode-both delay-[300ms]">
