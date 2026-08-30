@@ -60,10 +60,10 @@ export async function updateInstallmentGroup(
   groupId: string | null, 
   householdId: string,
   updatedData: any, 
-  applyToFuture: boolean,
+  scope: 'single' | 'future' | 'all',
   currentInstallmentIndex: number
 ) {
-  if (!applyToFuture || !groupId) {
+  if (scope === 'single' || !groupId) {
      return await supabase
        .from('transactions')
        .update(updatedData)
@@ -71,15 +71,55 @@ export async function updateInstallmentGroup(
        .eq('household_id', householdId)
   }
   
-  // Edita esta e as seguintes (propagação Nubank-style)
-  return await supabase
+  const { description, amount, category_id, type, payment_method, date } = updatedData
+
+  const payload: any = {}
+  if (amount !== undefined) payload.amount = amount
+  if (category_id !== undefined) payload.category_id = category_id
+  if (type !== undefined) payload.type = type
+  if (payment_method !== undefined) payload.payment_method = payment_method
+
+  let query = supabase
     .from('transactions')
-    .update({
-      amount: updatedData.amount,
-      category_id: updatedData.category_id
-      // Mantemos as descrições originais com as datas originais
-    })
+    .update(payload)
     .eq('installment_group_id', groupId)
     .eq('household_id', householdId)
-    .gte('installment_current', currentInstallmentIndex)
+
+  if (scope === 'future') {
+    query = query.gte('installment_current', currentInstallmentIndex)
+  }
+
+  const res = await query
+  if (res.error) return res
+
+  // Update description for group items if description changed
+  if (description) {
+    let fetchQuery = supabase
+      .from('transactions')
+      .select('id, installment_current, installment_total')
+      .eq('installment_group_id', groupId)
+      .eq('household_id', householdId)
+
+    if (scope === 'future') {
+      fetchQuery = fetchQuery.gte('installment_current', currentInstallmentIndex)
+    }
+
+    const { data: groupItems } = await fetchQuery
+    if (groupItems) {
+      const cleanDesc = description.replace(/\s*\(\d+\/\d+\)$/, '').trim()
+      for (const item of groupItems) {
+        const itemDesc = item.installment_total && item.installment_current
+          ? `${cleanDesc} (${item.installment_current}/${item.installment_total})`
+          : cleanDesc
+        await supabase.from('transactions').update({ description: itemDesc }).eq('id', item.id)
+      }
+    }
+  }
+
+  // Update date for the current transaction
+  if (date) {
+    await supabase.from('transactions').update({ date }).eq('id', transactionId).eq('household_id', householdId)
+  }
+
+  return res
 }

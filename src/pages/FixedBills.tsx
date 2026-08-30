@@ -219,12 +219,24 @@ function BillModal({ categories, onClose, onSave, initialData, deleteFixedBill }
 
            <div>
               <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Categoria de Gasto</label>
-              <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-4 bg-slate-50 rounded-2xl outline-indigo-500 font-bold text-slate-800 appearance-none">
-                 {categories.filter((c: any) => c.type === 'expense').map((c: any) => (
-                   <option key={c.id} value={c.name}>{c.name}</option>
-                 ))}
-                 {categories.filter((c: any) => c.type === 'expense').length === 0 && <option value="Geral">Geral</option>}
-              </select>
+              <div className="bg-slate-50 p-4 rounded-2xl flex items-center gap-3">
+                 {(() => {
+                   const selectedCat = categories.find((c: any) => c.name === category)
+                   return selectedCat?.icon ? (
+                     <span className="text-base leading-none">{selectedCat.icon}</span>
+                   ) : null
+                 })()}
+                 <select 
+                   value={category} 
+                   onChange={e => setCategory(e.target.value)} 
+                   className="bg-transparent outline-none text-xs font-bold uppercase w-full appearance-none cursor-pointer text-slate-800"
+                 >
+                    {categories.filter((c: any) => c.type === 'expense').map((c: any) => (
+                      <option key={c.id} value={c.name}>{c.icon ? `${c.icon} ${c.name}` : c.name}</option>
+                    ))}
+                    {categories.filter((c: any) => c.type === 'expense').length === 0 && <option value="Geral">Geral</option>}
+                 </select>
+              </div>
            </div>
         </div>
 

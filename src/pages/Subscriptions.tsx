@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Plus, CreditCard, Calendar, Trash2, Sparkles, Power } from 'lucide-react'
+import { Plus, Trash2, Power } from 'lucide-react'
 import { useFinanceData } from '../hooks/useFinanceData'
 import { format } from 'date-fns'
 
@@ -104,103 +104,54 @@ export function Subscriptions() {
         </button>
       </header>
 
-      {/* MOBILE COMPACT INDICATORS (Single Row, 3 Cols - Fits on 1 Screen) */}
-      <div className="md:hidden grid grid-cols-3 gap-2 bg-slate-900 text-white p-3 rounded-2xl shadow-lg border border-slate-800 mb-4">
-        {/* Metric 1 - Mensal */}
-        <div className="flex flex-col justify-between border-r border-slate-800/80 pr-1">
-          <span className="text-[8px] font-black uppercase tracking-tight text-indigo-400 flex items-center gap-1">
-            <CreditCard size={10} /> Mensal
-          </span>
-          <p className="text-xs font-black tracking-tight text-white mt-1">
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(monthlyTotal)}
-          </p>
-          <span className="text-[8px] text-slate-400 font-bold mt-0.5">{activeSubs.length} ativos</span>
-        </div>
-
-        {/* Metric 2 - Anual */}
-        <div className="flex flex-col justify-between border-r border-slate-800/80 px-1">
-          <span className="text-[8px] font-black uppercase tracking-tight text-emerald-400 flex items-center gap-1">
-            <Sparkles size={10} /> Anual
-          </span>
-          <p className="text-xs font-black tracking-tight text-white mt-1">
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(annualTotal)}
-          </p>
-          <span className="text-[8px] text-slate-400 font-bold mt-0.5">12 meses</span>
-        </div>
-
-        {/* Metric 3 - Próxima Fatura */}
-        <div className="flex flex-col justify-between pl-1">
-          <span className="text-[8px] font-black uppercase tracking-tight text-amber-400 flex items-center gap-1">
-            <Calendar size={10} /> Próxima
-          </span>
-          {nextBilling ? (
-            <>
-              <p className="text-xs font-black tracking-tight text-white mt-1 truncate" title={nextBilling.name}>
-                {nextBilling.name}
-              </p>
-              <span className="text-[8px] text-amber-300 font-bold mt-0.5 truncate">
-                Dia {nextBilling.billing_day} • {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(nextBilling.amount)}
-              </span>
-            </>
-          ) : (
-            <p className="text-[9px] font-bold text-slate-400 mt-1">Nenhuma</p>
-          )}
-        </div>
-      </div>
-
-      {/* DESKTOP METRICS CARDS */}
-      <div className="hidden md:grid grid-cols-3 gap-4 mb-8">
-        {/* Metric 1 */}
-        <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl border border-slate-800 relative overflow-hidden group">
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-600/20 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Mensal em Assinaturas</span>
-            <div className="w-9 h-9 bg-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center">
-              <CreditCard size={18} />
-            </div>
-          </div>
-          <p className="text-3xl font-black tracking-tight text-white">
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(monthlyTotal)}
-          </p>
-          <p className="text-[10px] text-slate-400 font-bold mt-2">
-            {activeSubs.length} {activeSubs.length === 1 ? 'serviço ativo' : 'serviços ativos'}
-          </p>
-        </div>
-
-        {/* Metric 2 */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Custo Anual Projetado</span>
-            <div className="w-9 h-9 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center">
-              <Sparkles size={18} />
-            </div>
-          </div>
-          <p className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(annualTotal)}
-          </p>
-          <p className="text-[10px] text-slate-400 font-bold mt-2">Projeção estimada para 12 meses</p>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Próxima Fatura</span>
-            <div className="w-9 h-9 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center">
-              <Calendar size={18} />
-            </div>
-          </div>
-          {nextBilling ? (
+      {/* HERO SINGLE METRIC CARD (Analytics Patrimônio Card Pattern) */}
+      <div className="mb-6 md:mb-8">
+        <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden border border-slate-800 shadow-2xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <p className="text-2xl font-black tracking-tight text-slate-900 dark:text-white truncate">
-                {nextBilling.name}
-              </p>
-              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 mt-1">
-                Dia {nextBilling.billing_day} • {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(nextBilling.amount)}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Total Mensal em Assinaturas</span>
+                <div className="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-400 rounded text-[8px] font-black uppercase tracking-tighter">Serviços Ativos</div>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(monthlyTotal)}
+              </h2>
+              <p className="text-[10px] text-slate-400 font-medium mt-1 italic">
+                {activeSubs.length} {activeSubs.length === 1 ? 'serviço ativo cadastrado' : 'serviços ativos cadastrados'}
               </p>
             </div>
-          ) : (
-            <p className="text-sm font-bold text-slate-400">Nenhuma assinatura ativa</p>
-          )}
+
+            <div className="flex gap-6 border-t md:border-t-0 md:border-l border-slate-800/80 pt-5 md:pt-0 md:pl-8">
+              <div>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Custo Anual</span>
+                <p className="text-lg font-black text-white leading-none">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(annualTotal)}
+                </p>
+                <span className="text-[8px] text-slate-500 font-bold uppercase mt-1 block">Projeção 12 meses</span>
+              </div>
+              
+              <div>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Próxima Fatura</span>
+                {nextBilling ? (
+                  <>
+                    <p className="text-lg font-black text-indigo-400 leading-none truncate max-w-[140px]" title={nextBilling.name}>
+                      {nextBilling.name}
+                    </p>
+                    <span className="text-[8px] text-slate-400 font-bold uppercase mt-1 block truncate">
+                      Dia {nextBilling.billing_day} • {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(nextBilling.amount)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-black text-slate-400 leading-none">Nenhuma</p>
+                    <span className="text-[8px] text-slate-500 font-bold uppercase mt-1 block">Sem pendências</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -423,19 +374,27 @@ export function Subscriptions() {
               {/* Category */}
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Categoria</label>
-                <select
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold outline-none focus:border-indigo-500 dark:text-white"
-                >
-                  {categories.length > 0 ? (
-                    categories.map(c => (
-                      <option key={c.id} value={c.name}>{c.icon} {c.name}</option>
-                    ))
-                  ) : (
-                    <option value="Geral">Geral</option>
-                  )}
-                </select>
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl flex items-center gap-2 border border-slate-200 dark:border-slate-700">
+                  {(() => {
+                    const selectedCat = categories.find(c => c.name === category)
+                    return selectedCat?.icon ? (
+                      <span className="text-sm leading-none">{selectedCat.icon}</span>
+                    ) : null
+                  })()}
+                  <select
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                    className="bg-transparent text-xs font-bold outline-none w-full dark:text-white cursor-pointer appearance-none"
+                  >
+                    {categories.length > 0 ? (
+                      categories.map(c => (
+                        <option key={c.id} value={c.name}>{c.icon ? `${c.icon} ${c.name}` : c.name}</option>
+                      ))
+                    ) : (
+                      <option value="Geral">Geral</option>
+                    )}
+                  </select>
+                </div>
               </div>
 
               {/* Buttons */}
