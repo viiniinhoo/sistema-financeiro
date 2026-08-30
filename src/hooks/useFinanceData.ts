@@ -29,7 +29,7 @@ const MOCK_FIXED_BILLS = [
 const MOCK_SUBSCRIPTIONS: any[] = []
 
 export function useFinanceData() {
-  const { householdId } = useAuth()
+  const { householdId, user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [transactions, setTransactions] = useState<any[]>(MOCK_TRANSACTIONS)
   const [categories, setCategories] = useState<any[]>(MOCK_CATEGORIES)
@@ -43,13 +43,19 @@ export function useFinanceData() {
     
     setIsSyncing(true)
     try {
-      const [transRes, catRes, goalRes, billsRes, subsRes] = await Promise.all([
+      const [transRes, catRes, goalRes, billsRes] = await Promise.all([
         supabase.from('transactions').select('*').eq('household_id', householdId).order('date', { ascending: false }),
         supabase.from('categories').select('*').eq('household_id', householdId),
         supabase.from('goals').select('*').eq('household_id', householdId),
-        supabase.from('fixed_bills').select('*').eq('household_id', householdId),
-        supabase.from('subscriptions').select('*').eq('household_id', householdId)
+        supabase.from('fixed_bills').select('*').eq('household_id', householdId)
       ])
+
+      let subsRes = await supabase.from('subscriptions').select('*').eq('household_id', householdId)
+      if (subsRes.error && (subsRes.error.code === '42703' || subsRes.error.message?.includes('household_id'))) {
+        subsRes = user?.id
+          ? await supabase.from('subscriptions').select('*').eq('user_id', user.id)
+          : await supabase.from('subscriptions').select('*')
+      }
 
       if (transRes.data && transRes.data.length > 0) setTransactions(transRes.data)
       if (catRes.data && catRes.data.length > 0) setCategories(catRes.data)
@@ -57,7 +63,7 @@ export function useFinanceData() {
       
       if (goalRes.data) setGoals(goalRes.data)
       if (billsRes.data && billsRes.data.length > 0) setFixedBills(billsRes.data)
-      if (subsRes.data && subsRes.data.length > 0) setSubscriptions(subsRes.data)
+      if (subsRes.data) setSubscriptions(subsRes.data)
       
     } catch (error) {
       console.log('Background sync error', error)
@@ -292,41 +298,72 @@ export function useFinanceData() {
   const upsertSubscription = async (sub: any) => {
     try {
       let res
-      const subData = {
+      const baseSubData = {
         name: sub.name,
         amount: sub.amount,
         billing_day: sub.billing_day,
         category: sub.category,
         icon: sub.icon || '💳',
         is_active: sub.is_active !== undefined ? sub.is_active : true,
-        household_id: householdId
       }
 
-      if (sub.id && sub.id.length > 5 && !sub.id.startsWith('sub-')) {
-        res = await supabase.from('subscriptions').update(subData).eq('id', sub.id)
+      const subDataWithHousehold = {
+        ...baseSubData,
+        household_id: householdId,
+        ...(user?.id ? { user_id: user.id } : {})
+      }
+
+      if (sub.id && sub.id.length > 5 && !sub.id.startsWith('sub-') && !sub.id.startsWith('temp-')) {
+        res = await supabase.from('subscriptions').update(subDataWithHousehold).eq('id', sub.id)
+        if (res.error && (res.error.code === '42703' || res.error.message?.includes('household_id'))) {
+          const subDataNoHousehold = {
+            ...baseSubData,
+            ...(user?.id ? { user_id: user.id } : {})
+          }
+          res = await supabase.from('subscriptions').update(subDataNoHousehold).eq('id', sub.id)
+        }
       } else {
-        res = await supabase.from('subscriptions').insert([subData])
+        res = await supabase.from('subscriptions').insert([subDataWithHousehold]).select()
+        if (res.error && (res.error.code === '42703' || res.error.message?.includes('household_id'))) {
+          const subDataNoHousehold = {
+            ...baseSubData,
+            ...(user?.id ? { user_id: user.id } : {})
+          }
+          res = await supabase.from('subscriptions').insert([subDataNoHousehold]).select()
+        }
       }
 
       if (res?.error) {
-        console.error('Supabase error:', res.error)
-        if (!sub.id || sub.id.startsWith('sub-') || sub.id.length <= 5) {
-          const newSub = { ...subData, id: 'temp-' + Math.random().toString(36).substr(2, 9) }
-          setSubscriptions(prev => [...prev, newSub])
+        console.error('Supabase error in upsertSubscription:', res.error)
+        const localSub = {
+          ...baseSubData,
+          id: sub.id && sub.id.length > 5 ? sub.id : 'temp-' + Math.random().toString(36).substr(2, 9)
+        }
+        if (!sub.id || sub.id.startsWith('sub-') || sub.id.startsWith('temp-') || sub.id.length <= 5) {
+          setSubscriptions(prev => [...prev, localSub])
         } else {
-          setSubscriptions(prev => prev.map(s => s.id === sub.id ? { ...s, ...subData } : s))
+          setSubscriptions(prev => prev.map(s => s.id === sub.id ? { ...s, ...localSub } : s))
         }
         return true
       }
+
       await refreshData()
       return true
     } catch (e) { 
-      // Fallback local update
-      if (!sub.id || sub.id.startsWith('sub-') || sub.id.length <= 5) {
-        const newSub = { ...sub, id: 'sub-' + Math.random().toString(36).substr(2, 9) }
-        setSubscriptions(prev => [...prev, newSub])
+      console.error('Exception in upsertSubscription:', e)
+      const localSub = {
+        name: sub.name,
+        amount: sub.amount,
+        billing_day: sub.billing_day,
+        category: sub.category,
+        icon: sub.icon || '💳',
+        is_active: sub.is_active !== undefined ? sub.is_active : true,
+        id: sub.id && sub.id.length > 5 ? sub.id : 'sub-' + Math.random().toString(36).substr(2, 9)
+      }
+      if (!sub.id || sub.id.startsWith('sub-') || sub.id.startsWith('temp-') || sub.id.length <= 5) {
+        setSubscriptions(prev => [...prev, localSub])
       } else {
-        setSubscriptions(prev => prev.map(s => s.id === sub.id ? sub : s))
+        setSubscriptions(prev => prev.map(s => s.id === sub.id ? localSub : s))
       }
       return true 
     }
