@@ -164,35 +164,34 @@ export function Subscriptions() {
           <div
             key={sub.id}
             onClick={() => handleOpenModal(sub)}
-            className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-2.5 cursor-pointer active:scale-[0.98] ${
+            className={`p-4 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
               sub.is_active
                 ? 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm hover:border-indigo-300'
                 : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200/60 dark:border-slate-800/60 opacity-60'
             }`}
           >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="text-base w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
-                {sub.icon || '💳'}
-              </span>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="font-bold text-slate-900 dark:text-white text-xs truncate">
+            {/* Top row: icon + info + actions */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <span className="text-base w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
+                  {sub.icon || '💳'}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-700 dark:text-white leading-tight break-words">
                     {sub.name}
-                  </h3>
-                  <span className="text-[8px] font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
-                    {sub.category || 'Geral'}
-                  </span>
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{sub.category || 'Geral'}</span>
+                    <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+                    <span className="text-[9px] font-medium text-slate-400">Dia {sub.billing_day} na fatura</span>
+                  </div>
                 </div>
-                <p className="text-[9px] text-slate-400 font-medium">Dia {sub.billing_day} na fatura</p>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sub.amount)}
-              </span>
-
-              <div className="flex items-center gap-1 pl-1 border-l border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 mr-1">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sub.amount)}
+                </span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
